@@ -3,258 +3,1713 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Expense Tracker</title>
+    <title>Room 100 Expense Tracker</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
+
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">Team Expense Tracker</h1>
-            <p class="text-gray-600">Track expenses for Amal, Ebin, Farhan & Shabin</p>
-        </div>
 
-        <!-- Dashboard Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div id="amal-card" class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-                <h3 class="font-semibold text-gray-800 mb-2">Amal</h3>
-                <p class="text-2xl font-bold text-blue-600" id="amal-total">₹0</p>
-                <p class="text-sm text-gray-500">Total Paid</p>
-            </div>
-            <div id="ebin-card" class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-                <h3 class="font-semibold text-gray-800 mb-2">Ebin</h3>
-                <p class="text-2xl font-bold text-green-600" id="ebin-total">₹0</p>
-                <p class="text-sm text-gray-500">Total Paid</p>
-            </div>
-            <div id="farhan-card" class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
-                <h3 class="font-semibold text-gray-800 mb-2">Farhan</h3>
-                <p class="text-2xl font-bold text-purple-600" id="farhan-total">₹0</p>
-                <p class="text-sm text-gray-500">Total Paid</p>
-            </div>
-            <div id="shabin-card" class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
-                <h3 class="font-semibold text-gray-800 mb-2">Shabin</h3>
-                <p class="text-2xl font-bold text-orange-600" id="shabin-total">₹0</p>
-                <p class="text-sm text-gray-500">Total Paid</p>
-            </div>
-        </div>
+<div class="container mx-auto px-4 py-8 max-w-6xl">
 
-        <!-- Settlement Summary -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">💰 Settlement Summary</h2>
-            <div id="settlement-info" class="space-y-3">
-                <p class="text-gray-600">Add some expenses to see who owes whom!</p>
-            </div>
-        </div>
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            Room Expense Tracker
+        </h1>
 
-        <!-- Add Expense Form -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">➕ Add New Expense</h2>
-            <form id="expense-form" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Who Paid?</label>
-                    <select id="payer" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="Amal">Amal</option>
-                        <option value="Ebin">Ebin</option>
-                        <option value="Farhan">Farhan</option>
-                        <option value="Shabin">Shabin</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
-                    <input type="number" id="amount" placeholder="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <input type="text" id="description" placeholder="What was it for?" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Expense Date</label>
-                    <input type="date" id="expense-date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                        Add Expense
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Recent Expenses -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">📋 Recent Expenses</h2>
-                <button id="reset-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
-                    Reset Month
-                </button>
-            </div>
-            <div id="expenses-list" class="space-y-3">
-                <p class="text-gray-600 text-center py-8">No expenses added yet. Add your first expense above!</p>
-            </div>
-        </div>
+        <p class="text-gray-600">
+            Track expenses for Amal, Ebin, Farhan & Shabin
+        </p>
     </div>
 
-     <script>
-        const members = ['Amal', 'Ebin', 'Farhan', 'Shabin'];
-        let expenses = JSON.parse(localStorage.getItem('teamExpenses')) || [];
 
-        // Set today's date as default for the date picker
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('expense-date').value = today;
+    <!-- Dashboard Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+            <h3 class="font-semibold text-gray-800 mb-2">Amal</h3>
+            <p class="text-2xl font-bold text-blue-600" id="amal-total">⃁0.00</p>
+            <p class="text-sm text-gray-500">Total Paid</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+            <h3 class="font-semibold text-gray-800 mb-2">Ebin</h3>
+            <p class="text-2xl font-bold text-green-600" id="ebin-total">⃁0.00</p>
+            <p class="text-sm text-gray-500">Total Paid</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+            <h3 class="font-semibold text-gray-800 mb-2">Farhan</h3>
+            <p class="text-2xl font-bold text-purple-600" id="farhan-total">⃁0.00</p>
+            <p class="text-sm text-gray-500">Total Paid</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+            <h3 class="font-semibold text-gray-800 mb-2">Shabin</h3>
+            <p class="text-2xl font-bold text-orange-600" id="shabin-total">⃁0.00</p>
+            <p class="text-sm text-gray-500">Total Paid</p>
+        </div>
+
+    </div>
+
+
+    <!-- Settlement Summary -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            💰 Settlement Summary
+        </h2>
+
+        <div id="settlement-info" class="space-y-3">
+            <p class="text-gray-600">
+                Add some expenses to see who owes whom!
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- Add / Edit Expense Form -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+
+        <div class="flex justify-between items-center mb-6">
+
+            <h2 id="form-title" class="text-2xl font-bold text-gray-800">
+                ➕ Add New Expense
+            </h2>
+
+            <button
+                type="button"
+                id="cancel-edit-btn"
+                class="hidden bg-gray-500 hover:bg-gray-600 text-white
+                       font-semibold py-2 px-4 rounded-lg transition">
+
+                Cancel Edit
+
+            </button>
+
+        </div>
+
+
+        <form id="expense-form"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+            <!-- Who Paid -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Who Paid?
+                </label>
+
+                <select
+                    id="payer"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-blue-500">
+
+                    <option value="Amal">Amal</option>
+                    <option value="Ebin">Ebin</option>
+                    <option value="Farhan">Farhan</option>
+                    <option value="Shabin">Shabin</option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Amount -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Amount (⃁)
+                </label>
+
+                <input
+                    type="number"
+                    id="amount"
+                    placeholder="0"
+                    min="0.01"
+                    step="0.01"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-blue-500"
+                    required>
+
+            </div>
+
+
+            <!-- Description -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+
+                <input
+                    type="text"
+                    id="description"
+                    placeholder="What was it for?"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-blue-500"
+                    required>
+
+            </div>
+
+
+            <!-- Date -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Expense Date
+                </label>
+
+                <input
+                    type="date"
+                    id="expense-date"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-blue-500"
+                    required>
+
+            </div>
+
+
+            <!-- Submit -->
+            <div class="flex items-end">
+
+                <button
+                    type="submit"
+                    id="submit-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white
+                           font-semibold py-3 px-6 rounded-lg transition">
+
+                    Add Expense
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- Split Between -->
+        <div class="mt-6">
+
+            <div class="flex justify-between items-center mb-3">
+
+                <label class="text-sm font-medium text-gray-700">
+                    👥 Split Expense Between
+                </label>
+
+                <button
+                    type="button"
+                    id="select-all-btn"
+                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+
+                    Deselect All
+
+                </button>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+                <label class="flex items-center gap-3 p-3 border rounded-lg
+                              cursor-pointer hover:bg-blue-50">
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Amal"
+                        checked
+                        class="w-5 h-5">
+
+                    <span class="font-medium">Amal</span>
+
+                </label>
+
+
+                <label class="flex items-center gap-3 p-3 border rounded-lg
+                              cursor-pointer hover:bg-green-50">
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Ebin"
+                        checked
+                        class="w-5 h-5">
+
+                    <span class="font-medium">Ebin</span>
+
+                </label>
+
+
+                <label class="flex items-center gap-3 p-3 border rounded-lg
+                              cursor-pointer hover:bg-purple-50">
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Farhan"
+                        checked
+                        class="w-5 h-5">
+
+                    <span class="font-medium">Farhan</span>
+
+                </label>
+
+
+                <label class="flex items-center gap-3 p-3 border rounded-lg
+                              cursor-pointer hover:bg-orange-50">
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Shabin"
+                        checked
+                        class="w-5 h-5">
+
+                    <span class="font-medium">Shabin</span>
+
+                </label>
+
+            </div>
+
+            <p class="text-sm text-gray-500 mt-2">
+                Select only the people who participated in this expense.
+                Your selection will be remembered for the next expense.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Expenses -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+
+        <div class="flex justify-between items-center mb-6">
+
+            <h2 class="text-2xl font-bold text-gray-800">
+                📋 Recent Expenses
+            </h2>
+
+            <button
+                id="reset-btn"
+                class="bg-red-600 hover:bg-red-700 text-white
+                       font-semibold py-2 px-4 rounded-lg transition">
+
+                Reset Month
+
+            </button>
+
+        </div>
+
+
+        <div id="expenses-list" class="space-y-3">
+
+            <p class="text-gray-600 text-center py-8">
+                No expenses added yet. Add your first expense above!
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // =========================================================
+    // MEMBERS
+    // =========================================================
+
+    const members = [
+        'Amal',
+        'Ebin',
+        'Farhan',
+        'Shabin'
+    ];
+
+
+    // =========================================================
+    // LOAD EXPENSE DATA
+    // =========================================================
+
+    let expenses =
+        JSON.parse(localStorage.getItem('teamExpenses')) || [];
+
+
+    // =========================================================
+    // LOAD PARTICIPANT SELECTION
+    // =========================================================
+    // This remembers who is selected for the next expense.
+
+    let savedParticipants =
+        JSON.parse(
+            localStorage.getItem('teamExpenseParticipants')
+        );
+
+
+    // If no saved selection exists, select everybody.
+    if (
+        !Array.isArray(savedParticipants) ||
+        savedParticipants.length === 0
+    ) {
+        savedParticipants = [...members];
+    }
+
+
+    // ID of expense currently being edited
+    let editingExpenseId = null;
+
+
+    // =========================================================
+    // INITIALIZE
+    // =========================================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        setToday();
+
+        restoreParticipantSelection();
+
+        updateSelectAllButton();
+
+    });
+
+
+    // =========================================================
+    // SET TODAY
+    // =========================================================
+
+    function setToday() {
+
+        document.getElementById('expense-date').value =
+            new Date().toISOString().split('T')[0];
+
+    }
+
+
+    // =========================================================
+    // SAVE EXPENSES
+    // =========================================================
+
+    function saveExpenses() {
+
+        localStorage.setItem(
+            'teamExpenses',
+            JSON.stringify(expenses)
+        );
+
+    }
+
+
+    // =========================================================
+    // SAVE PARTICIPANT SELECTION
+    // =========================================================
+
+    function saveParticipantSelection() {
+
+        const selectedParticipants =
+            Array.from(
+                document.querySelectorAll(
+                    'input[name="participants"]:checked'
+                )
+            ).map(
+                checkbox => checkbox.value
+            );
+
+
+        savedParticipants =
+            selectedParticipants;
+
+
+        localStorage.setItem(
+            'teamExpenseParticipants',
+            JSON.stringify(selectedParticipants)
+        );
+
+    }
+
+
+    // =========================================================
+    // RESTORE PARTICIPANT SELECTION
+    // =========================================================
+
+    function restoreParticipantSelection() {
+
+        const checkboxes =
+            document.querySelectorAll(
+                'input[name="participants"]'
+            );
+
+
+        checkboxes.forEach(checkbox => {
+
+            checkbox.checked =
+                savedParticipants.includes(
+                    checkbox.value
+                );
+
         });
 
-        function saveExpenses() {
-            localStorage.setItem('teamExpenses', JSON.stringify(expenses));
-        }
+    }
 
-        function addExpense(payer, amount, description, date) {
-            const expense = {
-                id: Date.now(),
-                payer,
-                amount: parseFloat(amount),
-                description,
-                date: date || new Date().toLocaleDateString(),
-                share: parseFloat(amount) / 4 // Split equally among 4 members
-            };
-            expenses.unshift(expense);
-            saveExpenses();
-            updateDashboard();
-        }
 
-        function calculateTotals() {
-            const totals = {};
-            members.forEach(member => totals[member] = 0);
-            
-            expenses.forEach(expense => {
-                totals[expense.payer] += expense.amount;
-            });
-            
-            return totals;
-        }
+    // =========================================================
+    // PARTICIPANT CHECKBOX CHANGE
+    // =========================================================
 
-        function calculateSettlements() {
-            const totals = calculateTotals();
-            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-            const sharePerPerson = totalExpenses / 4;
-            
-            const balances = {};
-            members.forEach(member => {
-                balances[member] = totals[member] - sharePerPerson;
-            });
-            
-            const settlements = [];
-            const debtors = members.filter(m => balances[m] < 0).sort((a, b) => balances[a] - balances[b]);
-            const creditors = members.filter(m => balances[m] > 0).sort((a, b) => balances[b] - balances[a]);
-            
-            let i = 0, j = 0;
-            while (i < debtors.length && j < creditors.length) {
-                const debtor = debtors[i];
-                const creditor = creditors[j];
-                const debt = Math.abs(balances[debtor]);
-                const credit = balances[creditor];
-                
-                const amount = Math.min(debt, credit);
-                if (amount > 0.01) {
-                    settlements.push({
-                        from: debtor,
-                        to: creditor,
-                        amount: Math.round(amount * 100) / 100
-                    });
+    document
+        .querySelectorAll(
+            'input[name="participants"]'
+        )
+        .forEach(checkbox => {
+
+            checkbox.addEventListener(
+                'change',
+                function() {
+
+                    saveParticipantSelection();
+
+                    updateSelectAllButton();
+
                 }
-                
-                balances[debtor] += amount;
-                balances[creditor] -= amount;
-                
-                if (Math.abs(balances[debtor]) < 0.01) i++;
-                if (Math.abs(balances[creditor]) < 0.01) j++;
-            }
-            
-            return settlements;
-        }
+            );
 
-        function updateDashboard() {
-            const totals = calculateTotals();
-            
-            // Update member cards
-            members.forEach(member => {
-                const total = totals[member] || 0;
-                document.getElementById(`${member.toLowerCase()}-total`).textContent = `₹${total.toFixed(2)}`;
-            });
-            
-            // Update settlement summary
-            const settlements = calculateSettlements();
-            const settlementDiv = document.getElementById('settlement-info');
-            
-            if (settlements.length === 0) {
-                settlementDiv.innerHTML = '<p class="text-green-600 font-semibold">🎉 All settled up! No one owes anyone.</p>';
-            } else {
-                settlementDiv.innerHTML = settlements.map(s => 
-                    `<div class="flex items-center justify-between bg-yellow-50 p-3 rounded-lg">
-                        <span class="text-gray-800">${s.from} owes ${s.to}</span>
-                        <span class="font-bold text-yellow-600">₹${s.amount}</span>
-                    </div>`
-                ).join('');
-            }
-            
-            // Update expenses list
-            const expensesList = document.getElementById('expenses-list');
-            if (expenses.length === 0) {
-                expensesList.innerHTML = '<p class="text-gray-600 text-center py-8">No expenses added yet. Add your first expense above!</p>';
-            } else {
-                expensesList.innerHTML = expenses.map(exp => 
-                    `<div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-                        <div>
-                            <p class="font-semibold text-gray-800">${exp.description}</p>
-                            <p class="text-sm text-gray-600">Paid by ${exp.payer} on ${exp.date}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-gray-800">₹${exp.amount.toFixed(2)}</p>
-                            <p class="text-sm text-gray-500">₹${exp.share.toFixed(2)} per person</p>
-                        </div>
-                    </div>`
-                ).join('');
-            }
-        }
-
-        // Event listeners
-        document.getElementById('expense-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const payer = document.getElementById('payer').value;
-            const amount = document.getElementById('amount').value;
-            const description = document.getElementById('description').value;
-            const dateInput = document.getElementById('expense-date').value;
-            // Use date in dd/mm/yyyy format for display, fallback to today if blank
-            let date;
-            if (dateInput) {
-                // Format to dd/mm/yyyy for consistency with previous display
-                const [yyyy, mm, dd] = dateInput.split('-');
-                date = `${dd}/${mm}/${yyyy}`;
-            } else {
-                date = new Date().toLocaleDateString();
-            }
-            
-            if (amount && description) {
-                addExpense(payer, amount, description, date);
-                document.getElementById('amount').value = '';
-                document.getElementById('description').value = '';
-                document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
-            }
         });
 
-        document.getElementById('reset-btn').addEventListener('click', function() {
-            if (confirm('Are you sure you want to reset all expenses? This will clear the entire month and cannot be undone.')) {
-                expenses = [];
-                saveExpenses();
-                updateDashboard();
-            }
-        });
 
-        // Initialize dashboard
+    // =========================================================
+    // ADD EXPENSE
+    // =========================================================
+
+    function addExpense(
+        payer,
+        amount,
+        description,
+        date,
+        participants
+    ) {
+
+        const expense = {
+
+            id: Date.now(),
+
+            payer: payer,
+
+            amount: parseFloat(amount),
+
+            description: description,
+
+            date: date,
+
+            participants: participants
+
+        };
+
+
+        expenses.unshift(expense);
+
+        saveExpenses();
+
         updateDashboard();
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d4c4d3a7e08702',t:'MTc1NzU2ODU4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+    }
+
+
+    // =========================================================
+    // CALCULATE TOTALS
+    // =========================================================
+
+    function calculateTotals() {
+
+        const totals = {};
+
+
+        members.forEach(member => {
+
+            totals[member] = 0;
+
+        });
+
+
+        expenses.forEach(expense => {
+
+            if (
+                totals[expense.payer] !== undefined
+            ) {
+
+                totals[expense.payer] +=
+                    Number(expense.amount);
+
+            }
+
+        });
+
+
+        return totals;
+
+    }
+
+
+    // =========================================================
+    // CALCULATE SETTLEMENTS
+    // =========================================================
+
+    function calculateSettlements() {
+
+        const balances = {};
+
+
+        members.forEach(member => {
+
+            balances[member] = 0;
+
+        });
+
+
+        expenses.forEach(expense => {
+
+            // Support old expenses
+            const participants =
+                Array.isArray(expense.participants) &&
+                expense.participants.length > 0
+                    ? expense.participants
+                    : members;
+
+
+            const share =
+                Number(expense.amount) /
+                participants.length;
+
+
+            // Person who paid gets credit
+            balances[expense.payer] +=
+                Number(expense.amount);
+
+
+            // Participants owe their share
+            participants.forEach(member => {
+
+                if (
+                    balances[member] !== undefined
+                ) {
+
+                    balances[member] -= share;
+
+                }
+
+            });
+
+        });
+
+
+        const debtors =
+            members
+                .filter(
+                    member =>
+                        balances[member] < -0.01
+                )
+                .sort(
+                    (a, b) =>
+                        balances[a] - balances[b]
+                );
+
+
+        const creditors =
+            members
+                .filter(
+                    member =>
+                        balances[member] > 0.01
+                )
+                .sort(
+                    (a, b) =>
+                        balances[b] - balances[a]
+                );
+
+
+        const settlements = [];
+
+
+        let i = 0;
+        let j = 0;
+
+
+        while (
+            i < debtors.length &&
+            j < creditors.length
+        ) {
+
+            const debtor =
+                debtors[i];
+
+            const creditor =
+                creditors[j];
+
+
+            const debt =
+                Math.abs(
+                    balances[debtor]
+                );
+
+
+            const credit =
+                balances[creditor];
+
+
+            const amount =
+                Math.min(
+                    debt,
+                    credit
+                );
+
+
+            if (amount > 0.01) {
+
+                settlements.push({
+
+                    from: debtor,
+
+                    to: creditor,
+
+                    amount:
+                        Math.round(
+                            amount * 100
+                        ) / 100
+
+                });
+
+            }
+
+
+            balances[debtor] +=
+                amount;
+
+            balances[creditor] -=
+                amount;
+
+
+            if (
+                Math.abs(
+                    balances[debtor]
+                ) < 0.01
+            ) {
+
+                i++;
+
+            }
+
+
+            if (
+                Math.abs(
+                    balances[creditor]
+                ) < 0.01
+            ) {
+
+                j++;
+
+            }
+
+        }
+
+
+        return settlements;
+
+    }
+
+
+    // =========================================================
+    // UPDATE DASHBOARD
+    // =========================================================
+
+    function updateDashboard() {
+
+        const totals =
+            calculateTotals();
+
+
+        // =====================================================
+        // MEMBER TOTALS
+        // =====================================================
+
+        members.forEach(member => {
+
+            const total =
+                totals[member] || 0;
+
+
+            document.getElementById(
+                `${member.toLowerCase()}-total`
+            ).textContent =
+                `⃁${total.toFixed(2)}`;
+
+        });
+
+
+        // =====================================================
+        // SETTLEMENT
+        // =====================================================
+
+        const settlementDiv =
+            document.getElementById(
+                'settlement-info'
+            );
+
+
+        const settlements =
+            calculateSettlements();
+
+
+        if (expenses.length === 0) {
+
+            settlementDiv.innerHTML = `
+                <p class="text-gray-600">
+                    Add some expenses to see who owes whom!
+                </p>
+            `;
+
+        }
+
+        else if (settlements.length === 0) {
+
+            settlementDiv.innerHTML = `
+                <p class="text-green-600 font-semibold">
+                    🎉 All settled up! No one owes anyone.
+                </p>
+            `;
+
+        }
+
+        else {
+
+            settlementDiv.innerHTML =
+                settlements.map(s => `
+
+                    <div class="
+                        flex items-center justify-between
+                        bg-yellow-50
+                        border border-yellow-200
+                        p-4
+                        rounded-lg
+                    ">
+
+                        <span class="text-gray-800">
+
+                            <strong>
+                                ${escapeHtml(s.from)}
+                            </strong>
+
+                            owes
+
+                            <strong>
+                                ${escapeHtml(s.to)}
+                            </strong>
+
+                        </span>
+
+                        <span class="
+                            font-bold
+                            text-yellow-600
+                            text-lg
+                        ">
+
+                            ⃁${s.amount.toFixed(2)}
+
+                        </span>
+
+                    </div>
+
+                `).join('');
+
+        }
+
+
+        // =====================================================
+        // EXPENSE LIST
+        // =====================================================
+
+        const expensesList =
+            document.getElementById(
+                'expenses-list'
+            );
+
+
+        if (expenses.length === 0) {
+
+            expensesList.innerHTML = `
+                <p class="text-gray-600 text-center py-8">
+                    No expenses added yet.
+                    Add your first expense above!
+                </p>
+            `;
+
+            return;
+
+        }
+
+
+        expensesList.innerHTML =
+            expenses.map(exp => {
+
+                const participants =
+                    Array.isArray(
+                        exp.participants
+                    ) &&
+                    exp.participants.length > 0
+                        ? exp.participants
+                        : members;
+
+
+                const share =
+                    Number(exp.amount) /
+                    participants.length;
+
+
+                return `
+
+                    <div class="
+                        bg-gray-50
+                        border border-gray-200
+                        p-4
+                        rounded-lg
+                    ">
+
+                        <div class="
+                            flex
+                            flex-col
+                            md:flex-row
+                            md:items-center
+                            md:justify-between
+                            gap-4
+                        ">
+
+                            <!-- Expense Information -->
+                            <div class="flex-1">
+
+                                <p class="
+                                    font-semibold
+                                    text-gray-800
+                                    text-lg
+                                ">
+
+                                    ${escapeHtml(
+                                        exp.description
+                                    )}
+
+                                </p>
+
+
+                                <p class="
+                                    text-sm
+                                    text-gray-600
+                                    mt-1
+                                ">
+
+                                    Paid by
+
+                                    <span class="font-medium">
+                                        ${escapeHtml(
+                                            exp.payer
+                                        )}
+                                    </span>
+
+                                    on
+
+                                    ${escapeHtml(
+                                        exp.date
+                                    )}
+
+                                </p>
+
+
+                                <p class="
+                                    text-sm
+                                    text-blue-600
+                                    mt-2
+                                ">
+
+                                    👥 Split between:
+
+                                    <span class="font-medium">
+
+                                        ${participants
+                                            .map(
+                                                p =>
+                                                    escapeHtml(p)
+                                            )
+                                            .join(', ')}
+
+                                    </span>
+
+                                </p>
+
+                            </div>
+
+
+                            <!-- Amount -->
+                            <div class="text-right">
+
+                                <p class="
+                                    font-bold
+                                    text-gray-800
+                                    text-lg
+                                ">
+
+                                    ⃁${Number(
+                                        exp.amount
+                                    ).toFixed(2)}
+
+                                </p>
+
+
+                                <p class="
+                                    text-sm
+                                    text-gray-500
+                                    mb-3
+                                ">
+
+                                    ⃁${share.toFixed(2)}
+                                    each
+
+                                </p>
+
+
+                                <!-- ACTION BUTTONS -->
+                                <div class="
+                                    flex
+                                    gap-2
+                                    justify-end
+                                ">
+
+                                    <button
+                                        onclick="editExpense(${exp.id})"
+                                        class="
+                                            bg-blue-500
+                                            hover:bg-blue-600
+                                            text-white
+                                            px-3
+                                            py-2
+                                            rounded-lg
+                                            text-sm
+                                            font-medium
+                                            transition
+                                        ">
+
+                                        ✏️ Edit
+
+                                    </button>
+
+
+                                    <button
+                                        onclick="deleteExpense(${exp.id})"
+                                        class="
+                                            bg-red-500
+                                            hover:bg-red-600
+                                            text-white
+                                            px-3
+                                            py-2
+                                            rounded-lg
+                                            text-sm
+                                            font-medium
+                                            transition
+                                        ">
+
+                                        🗑️ Delete
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join('');
+
+    }
+
+
+    // =========================================================
+    // EDIT EXPENSE
+    // =========================================================
+
+    function editExpense(id) {
+
+        const expense =
+            expenses.find(
+                exp => exp.id === id
+            );
+
+
+        if (!expense) {
+            return;
+        }
+
+
+        editingExpenseId = id;
+
+
+        // Change form title
+        document.getElementById(
+            'form-title'
+        ).textContent =
+            '✏️ Edit Expense';
+
+
+        // Change submit button
+        document.getElementById(
+            'submit-btn'
+        ).textContent =
+            'Update Expense';
+
+
+        document.getElementById(
+            'submit-btn'
+        ).classList.remove(
+            'bg-blue-600',
+            'hover:bg-blue-700'
+        );
+
+
+        document.getElementById(
+            'submit-btn'
+        ).classList.add(
+            'bg-green-600',
+            'hover:bg-green-700'
+        );
+
+
+        // Show cancel button
+        document.getElementById(
+            'cancel-edit-btn'
+        ).classList.remove('hidden');
+
+
+        // Fill form
+        document.getElementById(
+            'payer'
+        ).value =
+            expense.payer;
+
+
+        document.getElementById(
+            'amount'
+        ).value =
+            expense.amount;
+
+
+        document.getElementById(
+            'description'
+        ).value =
+            expense.description;
+
+
+        // Convert DD/MM/YYYY -> YYYY-MM-DD
+        let dateParts =
+            expense.date.split('/');
+
+
+        if (
+            dateParts.length === 3
+        ) {
+
+            const dd =
+                dateParts[0];
+
+            const mm =
+                dateParts[1];
+
+            const yyyy =
+                dateParts[2];
+
+
+            document.getElementById(
+                'expense-date'
+            ).value =
+                `${yyyy}-${mm}-${dd}`;
+
+        }
+
+        else {
+
+            document.getElementById(
+                'expense-date'
+            ).value =
+                expense.date;
+
+        }
+
+
+        // =====================================================
+        // Participants for THIS expense
+        // =====================================================
+
+        const participants =
+            Array.isArray(
+                expense.participants
+            )
+                ? expense.participants
+                : members;
+
+
+        document
+            .querySelectorAll(
+                'input[name="participants"]'
+            )
+            .forEach(checkbox => {
+
+                checkbox.checked =
+                    participants.includes(
+                        checkbox.value
+                    );
+
+            });
+
+
+        updateSelectAllButton();
+
+
+        // Scroll to form
+        document
+            .getElementById('expense-form')
+            .scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+    }
+
+
+    // =========================================================
+    // DELETE EXPENSE
+    // =========================================================
+
+    function deleteExpense(id) {
+
+        const expense =
+            expenses.find(
+                exp => exp.id === id
+            );
+
+
+        if (!expense) {
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `Delete "${expense.description}" for ⃁${Number(expense.amount).toFixed(2)}?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        expenses =
+            expenses.filter(
+                exp => exp.id !== id
+            );
+
+
+        saveExpenses();
+
+        updateDashboard();
+
+
+        // If deleting currently edited expense
+        if (
+            editingExpenseId === id
+        ) {
+
+            cancelEdit();
+
+        }
+
+    }
+
+
+    // =========================================================
+    // CANCEL EDIT
+    // =========================================================
+
+    function cancelEdit() {
+
+        editingExpenseId = null;
+
+
+        document.getElementById(
+            'form-title'
+        ).textContent =
+            '➕ Add New Expense';
+
+
+        document.getElementById(
+            'submit-btn'
+        ).textContent =
+            'Add Expense';
+
+
+        document.getElementById(
+            'submit-btn'
+        ).classList.remove(
+            'bg-green-600',
+            'hover:bg-green-700'
+        );
+
+
+        document.getElementById(
+            'submit-btn'
+        ).classList.add(
+            'bg-blue-600',
+            'hover:bg-blue-700'
+        );
+
+
+        document.getElementById(
+            'cancel-edit-btn'
+        ).classList.add('hidden');
+
+
+        // Clear form
+        document.getElementById(
+            'amount'
+        ).value = '';
+
+
+        document.getElementById(
+            'description'
+        ).value = '';
+
+
+        setToday();
+
+
+        // =====================================================
+        // IMPORTANT:
+        // Do NOT reset participant selection here.
+        // The user's preferred selection is preserved.
+        // =====================================================
+
+        restoreParticipantSelection();
+
+        updateSelectAllButton();
+
+
+        document.getElementById(
+            'payer'
+        ).value = 'Amal';
+
+    }
+
+
+    // =========================================================
+    // FORM SUBMIT
+    // =========================================================
+
+    document
+        .getElementById('expense-form')
+        .addEventListener(
+            'submit',
+            function(e) {
+
+                e.preventDefault();
+
+
+                const payer =
+                    document.getElementById(
+                        'payer'
+                    ).value;
+
+
+                const amount =
+                    document.getElementById(
+                        'amount'
+                    ).value;
+
+
+                const description =
+                    document.getElementById(
+                        'description'
+                    ).value.trim();
+
+
+                const dateInput =
+                    document.getElementById(
+                        'expense-date'
+                    ).value;
+
+
+                // Get selected participants
+                const participants =
+                    Array.from(
+                        document.querySelectorAll(
+                            'input[name="participants"]:checked'
+                        )
+                    ).map(
+                        input => input.value
+                    );
+
+
+                // =================================================
+                // VALIDATION
+                // =================================================
+
+                if (
+                    !amount ||
+                    parseFloat(amount) <= 0
+                ) {
+
+                    alert(
+                        'Please enter a valid amount.'
+                    );
+
+                    return;
+
+                }
+
+
+                if (!description) {
+
+                    alert(
+                        'Please enter a description.'
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    participants.length === 0
+                ) {
+
+                    alert(
+                        'Please select at least one person.'
+                    );
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // SAVE CURRENT PARTICIPANT SELECTION
+                // =================================================
+                // This is the important part.
+                // Whatever you selected for this expense becomes
+                // the default selection for the next expense.
+
+                saveParticipantSelection();
+
+
+                // =================================================
+                // FORMAT DATE
+                // =================================================
+
+                let date;
+
+
+                if (dateInput) {
+
+                    const [
+                        yyyy,
+                        mm,
+                        dd
+                    ] = dateInput.split('-');
+
+
+                    date =
+                        `${dd}/${mm}/${yyyy}`;
+
+                }
+
+                else {
+
+                    date =
+                        new Date()
+                            .toLocaleDateString();
+
+                }
+
+
+                // =================================================
+                // UPDATE EXISTING EXPENSE
+                // =================================================
+
+                if (
+                    editingExpenseId !== null
+                ) {
+
+                    const expense =
+                        expenses.find(
+                            exp =>
+                                exp.id ===
+                                editingExpenseId
+                        );
+
+
+                    if (expense) {
+
+                        expense.payer =
+                            payer;
+
+                        expense.amount =
+                            parseFloat(amount);
+
+                        expense.description =
+                            description;
+
+                        expense.date =
+                            date;
+
+                        expense.participants =
+                            participants;
+
+                    }
+
+
+                    saveExpenses();
+
+                    updateDashboard();
+
+                    cancelEdit();
+
+                }
+
+
+                // =================================================
+                // ADD NEW EXPENSE
+                // =================================================
+
+                else {
+
+                    addExpense(
+                        payer,
+                        amount,
+                        description,
+                        date,
+                        participants
+                    );
+
+
+                    // Clear only amount and description.
+                    // DO NOT reset participants.
+
+                    document.getElementById(
+                        'amount'
+                    ).value = '';
+
+
+                    document.getElementById(
+                        'description'
+                    ).value = '';
+
+
+                    setToday();
+
+
+                    // Keep the participant selection
+                    // exactly as the user left it.
+
+                    restoreParticipantSelection();
+
+                    updateSelectAllButton();
+
+                }
+
+            }
+        );
+
+
+    // =========================================================
+    // CANCEL EDIT BUTTON
+    // =========================================================
+
+    document
+        .getElementById('cancel-edit-btn')
+        .addEventListener(
+            'click',
+            cancelEdit
+        );
+
+
+    // =========================================================
+    // SELECT / DESELECT ALL
+    // =========================================================
+
+    document
+        .getElementById('select-all-btn')
+        .addEventListener(
+            'click',
+            function() {
+
+                const checkboxes =
+                    document.querySelectorAll(
+                        'input[name="participants"]'
+                    );
+
+
+                const allSelected =
+                    Array.from(
+                        checkboxes
+                    ).every(
+                        checkbox =>
+                            checkbox.checked
+                    );
+
+
+                checkboxes.forEach(
+                    checkbox => {
+
+                        checkbox.checked =
+                            !allSelected;
+
+                    }
+                );
+
+
+                // Save the new selection
+                saveParticipantSelection();
+
+
+                updateSelectAllButton();
+
+            }
+        );
+
+
+    // =========================================================
+    // UPDATE SELECT ALL BUTTON
+    // =========================================================
+
+    function updateSelectAllButton() {
+
+        const checkboxes =
+            document.querySelectorAll(
+                'input[name="participants"]'
+            );
+
+
+        const allSelected =
+            Array.from(
+                checkboxes
+            ).every(
+                checkbox =>
+                    checkbox.checked
+            );
+
+
+        document.getElementById(
+            'select-all-btn'
+        ).textContent =
+            allSelected
+                ? 'Deselect All'
+                : 'Select All';
+
+    }
+
+
+    // =========================================================
+    // RESET MONTH
+    // =========================================================
+
+    document
+        .getElementById('reset-btn')
+        .addEventListener(
+            'click',
+            function() {
+
+                if (
+                    expenses.length === 0
+                ) {
+
+                    alert(
+                        'There are no expenses to reset.'
+                    );
+
+                    return;
+
+                }
+
+
+                const confirmed =
+                    confirm(
+                        'Are you sure you want to delete ALL expenses? This cannot be undone.'
+                    );
+
+
+                if (!confirmed) {
+                    return;
+                }
+
+
+                expenses = [];
+
+                saveExpenses();
+
+                updateDashboard();
+
+                cancelEdit();
+
+            }
+        );
+
+
+    // =========================================================
+    // ESCAPE HTML
+    // =========================================================
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(
+                /&/g,
+                '&amp;'
+            )
+            .replace(
+                /</g,
+                '&lt;'
+            )
+            .replace(
+                />/g,
+                '&gt;'
+            )
+            .replace(
+                /"/g,
+                '&quot;'
+            )
+            .replace(
+                /'/g,
+                '&#039;'
+            );
+
+    }
+
+
+    // =========================================================
+    // INITIALIZE DASHBOARD
+    // =========================================================
+
+    updateDashboard();
+
+</script>
+
+</body>
 </html>
