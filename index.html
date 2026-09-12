@@ -1,1213 +1,895 @@
-<!DOCTYPE html> <html lang="en"> <head>
-<meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
 
-<title>Room 100 Expense Tracker</title>
+    <meta charset="UTF-8">
 
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Supabase JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-    /* =====================================================
-       BASE
-    ====================================================== */
-
-    html {
-        scroll-behavior: smooth;
-    }
-
-    body {
-        font-family: 'Inter', sans-serif;
-        animation: pageFadeIn 0.7s ease-out both;
-    }
-
-    /* =====================================================
-       PAGE FADE IN
-    ====================================================== */
-
-    @keyframes pageFadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    /* =====================================================
-       HEADER
-    ====================================================== */
-
-    .page-header {
-        animation: headerEnter 0.8s cubic-bezier(.22, 1, .36, 1) both;
-    }
-
-    @keyframes headerEnter {
-
-        from {
-            opacity: 0;
-            transform: translateY(-25px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-    }
-
-    /* =====================================================
-       DASHBOARD CARDS
-    ====================================================== */
-
-    .dashboard-card {
-        opacity: 0;
-        animation: cardEnter 0.65s cubic-bezier(.22, 1, .36, 1) forwards;
-
-        transition:
-            transform 0.25s ease,
-            box-shadow 0.25s ease;
-    }
-
-    .dashboard-card:nth-child(1) {
-        animation-delay: 0.15s;
-    }
-
-    .dashboard-card:nth-child(2) {
-        animation-delay: 0.25s;
-    }
-
-    .dashboard-card:nth-child(3) {
-        animation-delay: 0.35s;
-    }
-
-    .dashboard-card:nth-child(4) {
-        animation-delay: 0.45s;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-7px);
-
-        box-shadow:
-            0 20px 30px -10px rgba(0, 0, 0, 0.15);
-    }
-
-    @keyframes cardEnter {
-
-        from {
-            opacity: 0;
-            transform: translateY(25px) scale(0.97);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-    }
-
-    /* =====================================================
-       MAIN SECTIONS
-    ====================================================== */
-
-    .animated-section {
-        animation: sectionEnter 0.7s ease-out both;
-    }
-
-    .settlement-section {
-        animation-delay: 0.25s;
-    }
-
-    .form-section {
-        animation-delay: 0.35s;
-    }
-
-    .expenses-section {
-        animation-delay: 0.45s;
-    }
-
-    @keyframes sectionEnter {
-
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-    }
-
-    /* =====================================================
-       BUTTON ANIMATIONS
-    ====================================================== */
-
-    button {
-        transition:
-            transform 0.15s ease,
-            box-shadow 0.2s ease,
-            background-color 0.2s ease;
-    }
-
-    button:hover {
-        transform: translateY(-1px);
-    }
-
-    button:active {
-        transform: scale(0.96);
-    }
-
-    button:disabled {
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    /* =====================================================
-       INPUT ANIMATIONS
-    ====================================================== */
-
-    input,
-    select {
-        transition:
-            border-color 0.2s ease,
-            box-shadow 0.2s ease,
-            transform 0.2s ease;
-    }
-
-    input:focus,
-    select:focus {
-        transform: translateY(-1px);
-    }
-
-    /* =====================================================
-       PARTICIPANT CARDS
-    ====================================================== */
-
-    .participant-card {
-        transition:
-            transform 0.2s ease,
-            background-color 0.2s ease,
-            border-color 0.2s ease,
-            box-shadow 0.2s ease;
-    }
-
-    .participant-card:hover {
-        transform: translateY(-3px);
-
-        box-shadow:
-            0 8px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    .participant-card:has(input:checked) {
-        box-shadow:
-            0 0 0 2px rgba(59, 130, 246, 0.15);
-    }
-
-    .participant-card input {
-        transition: transform 0.2s ease;
-    }
-
-    .participant-card input:checked {
-        transform: scale(1.15);
-    }
-
-    /* =====================================================
-       EXPENSE ITEMS
-    ====================================================== */
-
-    .expense-item {
-        animation: expenseEnter 0.45s ease-out both;
-
-        transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease,
-            border-color 0.2s ease;
-    }
-
-    .expense-item:hover {
-        transform: translateX(4px);
-
-        box-shadow:
-            0 8px 20px rgba(0, 0, 0, 0.07);
-
-        border-color: #bfdbfe;
-    }
-
-    @keyframes expenseEnter {
-
-        from {
-            opacity: 0;
-            transform: translateX(-15px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-    }
-
-    /* =====================================================
-       SETTLEMENT ANIMATION
-    ====================================================== */
-
-    .settlement-item {
-        animation: settlementEnter 0.45s ease-out both;
-
-        transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease;
-    }
-
-    .settlement-item:hover {
-        transform: translateX(5px);
-
-        box-shadow:
-            0 8px 18px rgba(234, 179, 8, 0.12);
-    }
-
-    @keyframes settlementEnter {
-
-        from {
-            opacity: 0;
-            transform: translateX(-15px) scale(0.98);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-        }
-
-    }
-
-    /* =====================================================
-       MONEY UPDATE
-    ====================================================== */
-
-    .money-pop {
-        animation: moneyPop 0.45s ease-out;
-    }
-
-    @keyframes moneyPop {
-
-        0% {
-            transform: scale(1);
-        }
-
-        40% {
-            transform: scale(1.12);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-
-    }
-
-    /* =====================================================
-       CONNECTION STATUS
-    ====================================================== */
-
-    #connection-status {
-        transition:
-            color 0.3s ease,
-            opacity 0.3s ease;
-    }
-
-    /* =====================================================
-       LOADING DOTS
-    ====================================================== */
-
-    .loading-dots::after {
-
-        content: '';
-
-        display: inline-block;
-
-        width: 1.2em;
-
-        animation:
-            loadingDots 1.4s infinite;
-
-    }
-
-    @keyframes loadingDots {
-
-        0% {
-            content: '';
-        }
-
-        25% {
-            content: '.';
-        }
-
-        50% {
-            content: '..';
-        }
-
-        75%,
-        100% {
-            content: '...';
-        }
-
-    }
-
-    /* =====================================================
-       SUCCESS MESSAGE
-    ====================================================== */
-
-    .success-message {
-        animation:
-            successPop 0.5s cubic-bezier(.22, 1, .36, 1);
-    }
-
-    @keyframes successPop {
-
-        0% {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-
-        70% {
-            transform: scale(1.02);
-        }
-
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-    }
-
-    /* =====================================================
-       REDUCED MOTION
-    ====================================================== */
-
-    @media (prefers-reduced-motion: reduce) {
-
-        *,
-        *::before,
-        *::after {
-
-            animation-duration: 0.01ms !important;
-
-            animation-iteration-count: 1 !important;
-
-            transition-duration: 0.01ms !important;
-
-            scroll-behavior: auto !important;
-
-        }
-
-    }
-
-</style>
-
-</head> <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen"> <div class="container mx-auto px-4 py-8 max-w-6xl">
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<div class="page-header text-center mb-8">
-
-    <h1 class="text-4xl font-bold text-gray-800 mb-2">
-        Room Expense Tracker
-    </h1>
-
-    <p class="text-gray-600">
-        Track expenses for Amal, Ebin, Farhan & Shabin
-    </p>
-
-    <p
-        id="connection-status"
-        class="text-sm text-gray-500 mt-2"
-    >
-        Connecting to database...
-    </p>
-
-</div>
-
-<!-- =====================================================
-     DASHBOARD CARDS
-====================================================== -->
-
-<div
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
->
-
-    <!-- AMAL -->
-
-    <div
-        class="dashboard-card bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500"
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
     >
 
-        <h3 class="font-semibold text-gray-800 mb-2">
-            Amal
-        </h3>
+    <title>Room 100 Expense Tracker</title>
 
-        <p
-            class="text-2xl font-bold text-blue-600"
-            id="amal-total"
-        >
-            SAR 0.00
-        </p>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <p class="text-sm text-gray-500">
-            Total Paid
-        </p>
+    <!-- Supabase JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    </div>
+    <style>
 
-    <!-- EBIN -->
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    <div
-        class="dashboard-card bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500"
-    >
+        body {
+            font-family: 'Inter', sans-serif;
+        }
 
-        <h3 class="font-semibold text-gray-800 mb-2">
-            Ebin
-        </h3>
+    </style>
 
-        <p
-            class="text-2xl font-bold text-green-600"
-            id="ebin-total"
-        >
-            SAR 0.00
-        </p>
+</head>
 
-        <p class="text-sm text-gray-500">
-            Total Paid
-        </p>
 
-    </div>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
-    <!-- FARHAN -->
 
-    <div
-        class="dashboard-card bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500"
-    >
+<div class="container mx-auto px-4 py-8 max-w-6xl">
 
-        <h3 class="font-semibold text-gray-800 mb-2">
-            Farhan
-        </h3>
 
-        <p
-            class="text-2xl font-bold text-purple-600"
-            id="farhan-total"
-        >
-            SAR 0.00
-        </p>
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-        <p class="text-sm text-gray-500">
-            Total Paid
-        </p>
+    <div class="text-center mb-8">
 
-    </div>
-
-    <!-- SHABIN -->
-
-    <div
-        class="dashboard-card bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500"
-    >
-
-        <h3 class="font-semibold text-gray-800 mb-2">
-            Shabin
-        </h3>
-
-        <p
-            class="text-2xl font-bold text-orange-600"
-            id="shabin-total"
-        >
-            SAR 0.00
-        </p>
-
-        <p class="text-sm text-gray-500">
-            Total Paid
-        </p>
-
-    </div>
-
-</div>
-
-<!-- =====================================================
-     SETTLEMENT SUMMARY
-====================================================== -->
-
-<div
-    class="animated-section settlement-section bg-white rounded-xl shadow-lg p-6 mb-8"
->
-
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">
-        💰 Settlement Summary
-    </h2>
-
-    <div
-        id="settlement-info"
-        class="space-y-3"
-    >
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            Room Expense Tracker
+        </h1>
 
         <p class="text-gray-600">
-            Loading...
+            Track expenses for Amal, Ebin, Farhan & Shabin
+        </p>
+
+        <p
+            id="connection-status"
+            class="text-sm text-gray-500 mt-2"
+        >
+            Connecting to database...
         </p>
 
     </div>
 
-</div>
 
-<!-- =====================================================
-     ADD / EDIT EXPENSE
-====================================================== -->
-
-<div
-    class="animated-section form-section bg-white rounded-xl shadow-lg p-6 mb-8"
->
+    <!-- =====================================================
+         DASHBOARD CARDS
+    ====================================================== -->
 
     <div
-        class="flex justify-between items-center mb-6"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
     >
 
-        <h2
-            id="form-title"
-            class="text-2xl font-bold text-gray-800"
-        >
-            ➕ Add New Expense
-        </h2>
 
-        <button
-            type="button"
-            id="cancel-edit-btn"
-            class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg"
+        <!-- AMAL -->
+
+        <div
+            class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500"
         >
-            Cancel Edit
-        </button>
+
+            <h3 class="font-semibold text-gray-800 mb-2">
+                Amal
+            </h3>
+
+            <p
+                class="text-2xl font-bold text-blue-600"
+                id="amal-total"
+            >
+                SAR 0.00
+            </p>
+
+            <p class="text-sm text-gray-500">
+                Total Paid
+            </p>
+
+        </div>
+
+
+        <!-- EBIN -->
+
+        <div
+            class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500"
+        >
+
+            <h3 class="font-semibold text-gray-800 mb-2">
+                Ebin
+            </h3>
+
+            <p
+                class="text-2xl font-bold text-green-600"
+                id="ebin-total"
+            >
+                SAR 0.00
+            </p>
+
+            <p class="text-sm text-gray-500">
+                Total Paid
+            </p>
+
+        </div>
+
+
+        <!-- FARHAN -->
+
+        <div
+            class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500"
+        >
+
+            <h3 class="font-semibold text-gray-800 mb-2">
+                Farhan
+            </h3>
+
+            <p
+                class="text-2xl font-bold text-purple-600"
+                id="farhan-total"
+            >
+                SAR 0.00
+            </p>
+
+            <p class="text-sm text-gray-500">
+                Total Paid
+            </p>
+
+        </div>
+
+
+        <!-- SHABIN -->
+
+        <div
+            class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500"
+        >
+
+            <h3 class="font-semibold text-gray-800 mb-2">
+                Shabin
+            </h3>
+
+            <p
+                class="text-2xl font-bold text-orange-600"
+                id="shabin-total"
+            >
+                SAR 0.00
+            </p>
+
+            <p class="text-sm text-gray-500">
+                Total Paid
+            </p>
+
+        </div>
 
     </div>
 
-    <form
-        id="expense-form"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
+
+    <!-- =====================================================
+         SETTLEMENT SUMMARY
+    ====================================================== -->
+
+    <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8"
     >
 
-        <!-- WHO PAID -->
-
-        <div>
-
-            <label
-                class="block text-sm font-medium text-gray-700 mb-2"
-            >
-                Who Paid?
-            </label>
-
-            <select
-                id="payer"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-
-                <option value="Amal">
-                    Amal
-                </option>
-
-                <option value="Ebin">
-                    Ebin
-                </option>
-
-                <option value="Farhan">
-                    Farhan
-                </option>
-
-                <option value="Shabin">
-                    Shabin
-                </option>
-
-            </select>
-
-        </div>
-
-        <!-- AMOUNT -->
-
-        <div>
-
-            <label
-                class="block text-sm font-medium text-gray-700 mb-2"
-            >
-                Amount (SAR)
-            </label>
-
-            <input
-                type="number"
-                id="amount"
-                placeholder="0"
-                min="0.01"
-                step="0.01"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-            >
-
-        </div>
-
-        <!-- DESCRIPTION -->
-
-        <div>
-
-            <label
-                class="block text-sm font-medium text-gray-700 mb-2"
-            >
-                Description
-            </label>
-
-            <input
-                type="text"
-                id="description"
-                placeholder="What was it for?"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-            >
-
-        </div>
-
-        <!-- DATE -->
-
-        <div>
-
-            <label
-                class="block text-sm font-medium text-gray-700 mb-2"
-            >
-                Expense Date
-            </label>
-
-            <input
-                type="date"
-                id="expense-date"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-            >
-
-        </div>
-
-        <!-- SUBMIT -->
-
-        <div class="flex items-end">
-
-            <button
-                type="submit"
-                id="submit-btn"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg"
-            >
-                Add Expense
-            </button>
-
-        </div>
-
-    </form>
-
-    <!-- =================================================
-         PARTICIPANTS
-    ================================================== -->
-
-    <div class="mt-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            💰 Settlement Summary
+        </h2>
 
         <div
-            class="flex justify-between items-center mb-3"
+            id="settlement-info"
+            class="space-y-3"
         >
 
-            <label
-                class="text-sm font-medium text-gray-700"
+            <p class="text-gray-600">
+                Loading...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ADD / EDIT EXPENSE
+    ====================================================== -->
+
+    <div
+        class="bg-white rounded-xl shadow-lg p-6 mb-8"
+    >
+
+
+        <div
+            class="flex justify-between items-center mb-6"
+        >
+
+            <h2
+                id="form-title"
+                class="text-2xl font-bold text-gray-800"
             >
-                👥 Split Expense Between
-            </label>
+                ➕ Add New Expense
+            </h2>
+
 
             <button
                 type="button"
-                id="select-all-btn"
-                class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                id="cancel-edit-btn"
+                class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
-                Deselect All
+                Cancel Edit
             </button>
 
         </div>
 
-        <div
-            class="grid grid-cols-2 md:grid-cols-4 gap-3"
+
+        <form
+            id="expense-form"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
         >
 
-            <label
-                class="participant-card flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
-            >
 
-                <input
-                    type="checkbox"
-                    name="participants"
-                    value="Amal"
-                    checked
-                    class="w-5 h-5"
+            <!-- WHO PAID -->
+
+            <div>
+
+                <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Who Paid?
+                </label>
+
+
+                <select
+                    id="payer"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
 
-                <span class="font-medium">
-                    Amal
-                </span>
+                    <option value="Amal">
+                        Amal
+                    </option>
 
-            </label>
+                    <option value="Ebin">
+                        Ebin
+                    </option>
 
-            <label
-                class="participant-card flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-green-50"
-            >
+                    <option value="Farhan">
+                        Farhan
+                    </option>
+
+                    <option value="Shabin">
+                        Shabin
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- AMOUNT -->
+
+            <div>
+
+                <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Amount (SAR)
+                </label>
+
 
                 <input
-                    type="checkbox"
-                    name="participants"
-                    value="Ebin"
-                    checked
-                    class="w-5 h-5"
+                    type="number"
+                    id="amount"
+                    placeholder="0"
+                    min="0.01"
+                    step="0.01"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                 >
 
-                <span class="font-medium">
-                    Ebin
-                </span>
+            </div>
 
-            </label>
 
-            <label
-                class="participant-card flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50"
-            >
+            <!-- DESCRIPTION -->
+
+            <div>
+
+                <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Description
+                </label>
+
 
                 <input
-                    type="checkbox"
-                    name="participants"
-                    value="Farhan"
-                    checked
-                    class="w-5 h-5"
+                    type="text"
+                    id="description"
+                    placeholder="What was it for?"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                 >
 
-                <span class="font-medium">
-                    Farhan
-                </span>
+            </div>
 
-            </label>
 
-            <label
-                class="participant-card flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-orange-50"
-            >
+            <!-- DATE -->
+
+            <div>
+
+                <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Expense Date
+                </label>
+
 
                 <input
-                    type="checkbox"
-                    name="participants"
-                    value="Shabin"
-                    checked
-                    class="w-5 h-5"
+                    type="date"
+                    id="expense-date"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                 >
 
-                <span class="font-medium">
-                    Shabin
-                </span>
+            </div>
 
-            </label>
+
+            <!-- SUBMIT -->
+
+            <div class="flex items-end">
+
+                <button
+                    type="submit"
+                    id="submit-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition"
+                >
+                    Add Expense
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- =================================================
+             PARTICIPANTS
+        ================================================== -->
+
+        <div class="mt-6">
+
+
+            <div
+                class="flex justify-between items-center mb-3"
+            >
+
+                <label
+                    class="text-sm font-medium text-gray-700"
+                >
+                    👥 Split Expense Between
+                </label>
+
+
+                <button
+                    type="button"
+                    id="select-all-btn"
+                    class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                    Deselect All
+                </button>
+
+            </div>
+
+
+            <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-3"
+            >
+
+
+                <label
+                    class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
+                >
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Amal"
+                        checked
+                        class="w-5 h-5"
+                    >
+
+                    <span class="font-medium">
+                        Amal
+                    </span>
+
+                </label>
+
+
+                <label
+                    class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-green-50"
+                >
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Ebin"
+                        checked
+                        class="w-5 h-5"
+                    >
+
+                    <span class="font-medium">
+                        Ebin
+                    </span>
+
+                </label>
+
+
+                <label
+                    class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50"
+                >
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Farhan"
+                        checked
+                        class="w-5 h-5"
+                    >
+
+                    <span class="font-medium">
+                        Farhan
+                    </span>
+
+                </label>
+
+
+                <label
+                    class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-orange-50"
+                >
+
+                    <input
+                        type="checkbox"
+                        name="participants"
+                        value="Shabin"
+                        checked
+                        class="w-5 h-5"
+                    >
+
+                    <span class="font-medium">
+                        Shabin
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <p class="text-sm text-gray-500 mt-2">
+                Select only the people who participated in this expense.
+                Your selection is remembered on this device.
+            </p>
 
         </div>
 
-        <p class="text-sm text-gray-500 mt-2">
-            Select only the people who participated in this expense.
-            Your selection is remembered on this device.
-        </p>
-
     </div>
 
-</div>
 
-<!-- =====================================================
-     RECENT EXPENSES
-====================================================== -->
-
-<div
-    class="animated-section expenses-section bg-white rounded-xl shadow-lg p-6 mb-8"
->
+    <!-- =====================================================
+         RECENT EXPENSES
+    ====================================================== -->
 
     <div
-        class="flex justify-between items-center mb-6"
+        class="bg-white rounded-xl shadow-lg p-6 mb-8"
     >
 
-        <h2 class="text-2xl font-bold text-gray-800">
-            📋 Recent Expenses
-        </h2>
 
-        <button
-            id="reset-btn"
-            class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg"
+        <div
+            class="flex justify-between items-center mb-6"
         >
-            Reset Month
-        </button>
 
-    </div>
+            <h2 class="text-2xl font-bold text-gray-800">
+                📋 Recent Expenses
+            </h2>
 
-    <div
-        id="expenses-list"
-        class="space-y-3"
-    >
 
-        <p class="text-gray-600 text-center py-8 loading-dots">
-            Loading expenses
-        </p>
+            <button
+                id="reset-btn"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+            >
+                Reset Month
+            </button>
+
+        </div>
+
+
+        <div
+            id="expenses-list"
+            class="space-y-3"
+        >
+
+            <p class="text-gray-600 text-center py-8">
+                Loading expenses...
+            </p>
+
+        </div>
 
     </div>
 
 </div>
 
-</div> <script>
+
+<script>
+
 /* =========================================================
-SUPABASE CONFIGURATION
+   SUPABASE CONFIGURATION
+=========================================================
+
+   IMPORTANT:
+
+   Replace the two values below with your Supabase
+   Project URL and PUBLIC / ANON KEY.
+
 ========================================================= */
 
+
 const SUPABASE_URL =
-'https://zxsffkqtaoovpnodpvpu.supabase.co/rest/v1/';
+    'https://zxsffkqtaoovpnodpvpu.supabase.co/rest/v1/';
+
 
 const SUPABASE_ANON_KEY =
-'sb_publishable_2R7BzqIJf_CIi_cukwvuig_FZ3d72dI';
+    'sb_publishable_2R7BzqIJf_CIi_cukwvuig_FZ3d72dI';
+
 
 /* =========================================================
-CREATE SUPABASE CLIENT
+   CREATE SUPABASE CLIENT
 ========================================================= */
 
 const supabaseClient =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY
-);
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+
 
 /* =========================================================
-MEMBERS
+   MEMBERS
 ========================================================= */
 
 const members = [
-'Amal',
-'Ebin',
-'Farhan',
-'Shabin'
+    'Amal',
+    'Ebin',
+    'Farhan',
+    'Shabin'
 ];
 
+
 /* =========================================================
-EXPENSES
+   EXPENSES
 ========================================================= */
 
 let expenses = [];
 
+
 /* =========================================================
-EDIT STATE
+   EDIT STATE
 ========================================================= */
 
 let editingExpenseId = null;
 
+
 /* =========================================================
-PARTICIPANT PREFERENCE
+   PARTICIPANT PREFERENCE
+=========================================================
+
+   This is intentionally stored locally.
+
+   It remembers each person's preferred selection
+   on their own device.
+
 ========================================================= */
 
 let savedParticipants =
-JSON.parse(
-localStorage.getItem(
-'teamExpenseParticipants'
-)
-);
+    JSON.parse(
+        localStorage.getItem(
+            'teamExpenseParticipants'
+        )
+    );
+
 
 if (
-!Array.isArray(savedParticipants) ||
-savedParticipants.length === 0
+    !Array.isArray(savedParticipants) ||
+    savedParticipants.length === 0
 ) {
 
-savedParticipants =
-    [...members];
+    savedParticipants =
+        [...members];
 
 }
+
 
 /* =========================================================
-INITIALIZE
+   INITIALIZE
 ========================================================= */
 
-document
-.getElementById(
-'expense-form'
-)
-.addEventListener(
-'submit',
-async function(e) {
-}
+document.addEventListener(
+    'DOMContentLoaded',
+    async function() {
+
+        setToday();
+
+        restoreParticipantSelection();
+
+        updateSelectAllButton();
+
+        setupRealtime();
+
+        await loadExpenses();
+
+    }
 );
 
 
 /* =========================================================
-SET TODAY
+   SET TODAY
 ========================================================= */
 
 function setToday() {
 
-const today =
-    new Date()
-        .toISOString()
-        .split('T')[0];
+    const today =
+        new Date()
+            .toISOString()
+            .split('T')[0];
 
-document.getElementById(
-    'expense-date'
-).value =
-    today;
+
+    document.getElementById(
+        'expense-date'
+    ).value =
+        today;
 
 }
 
+
 /* =========================================================
-CONNECTION STATUS
+   CONNECTION STATUS
 ========================================================= */
 
 function setConnectionStatus(
-message,
-className
+    message,
+    className
 ) {
 
-const element =
-    document.getElementById(
-        'connection-status'
-    );
+    const element =
+        document.getElementById(
+            'connection-status'
+        );
 
-element.style.opacity = '0';
 
-setTimeout(
-    function() {
+    element.textContent =
+        message;
 
-        element.textContent =
-            message;
 
-        element.className =
-            `text-sm mt-2 ${className}`;
-
-        element.style.opacity = '1';
-
-    },
-    120
-);
+    element.className =
+        `text-sm mt-2 ${className}`;
 
 }
 
+
 /* =========================================================
-LOAD EXPENSES
+   LOAD EXPENSES
 ========================================================= */
 
 async function loadExpenses() {
 
     setConnectionStatus(
-        '🟡 Connecting to database...',
+        'Loading expenses...',
         'text-yellow-600'
     );
 
-    console.log('Supabase URL:', SUPABASE_URL);
-    console.log('Supabase client:', supabaseClient);
 
-    try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from('expenses')
             .select('*')
-            .order('expense_date', {
-                ascending: false
-            });
+            .order(
+                'expense_date',
+                {
+                    ascending: false
+                }
+            );
 
-        console.log('Supabase response:', {
-            data,
+
+    if (error) {
+
+        console.error(
+            'Load expenses error:',
             error
-        });
-
-        if (error) {
-
-            console.error('Supabase error:', error);
-
-            setConnectionStatus(
-                '🔴 Database error: ' + error.message,
-                'text-red-600'
-            );
-
-            alert(
-                'Supabase database error:\n\n' +
-                error.message
-            );
-
-            return;
-        }
-
-        expenses = data.map(convertDatabaseExpense);
-
-        updateDashboard();
-
-        setConnectionStatus(
-            '🟢 Connected • Live updates enabled',
-            'text-green-600'
         );
 
-    } catch (error) {
-
-        console.error('Connection exception:', error);
 
         setConnectionStatus(
-            '🔴 Connection failed',
+            '🔴 Database error',
             'text-red-600'
         );
 
+
         alert(
-            'Could not connect to Supabase:\n\n' +
+            'Could not load expenses.\n\n' +
             error.message
         );
+
+
+        return;
+
     }
-}
+
+
+    expenses =
+        data.map(
+            convertDatabaseExpense
+        );
+
+
+    updateDashboard();
 
 
     setConnectionStatus(
-        '🔴 Database error',
-        'text-red-600'
+        '🟢 Connected • Live updates enabled',
+        'text-green-600'
     );
-
-    alert(
-        'Could not load expenses.\n\n' +
-        error.message
-    );
-
-    return;
 
 }
 
-expenses =
-    data.map(
-        convertDatabaseExpense
-    );
-
-updateDashboard();
-
-setConnectionStatus(
-    '🟢 Connected • Live updates enabled',
-    'text-green-600'
-);
-
-}
 
 /* =========================================================
-CONVERT DATABASE EXPENSE
+   CONVERT DATABASE EXPENSE
 ========================================================= */
 
 function convertDatabaseExpense(
-row
+    row
 ) {
 
-return {
+    return {
 
-    id:
-        row.id,
+        id:
+            row.id,
 
-    payer:
-        row.payer,
+        payer:
+            row.payer,
 
-    amount:
-        Number(row.amount),
+        amount:
+            Number(row.amount),
 
-    description:
-        row.description,
+        description:
+            row.description,
 
-    date:
-        formatDatabaseDate(
-            row.expense_date
-        ),
+        date:
+            formatDatabaseDate(
+                row.expense_date
+            ),
 
-    participants:
-        Array.isArray(
-            row.participants
-        )
-            ? row.participants
-            : members
+        participants:
+            Array.isArray(
+                row.participants
+            )
+                ? row.participants
+                : members
 
-};
+    };
 
 }
 
+
 /* =========================================================
-FORMAT DATABASE DATE
+   FORMAT DATABASE DATE
 ========================================================= */
 
 function formatDatabaseDate(
-date
+    date
 ) {
 
-if (!date) {
-    return '';
+    if (!date) {
+        return '';
+    }
+
+
+    const parts =
+        date.split('-');
+
+
+    if (
+        parts.length !== 3
+    ) {
+
+        return date;
+
+    }
+
+
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+
 }
 
-const parts =
-    date.split('-');
 
-if (
-    parts.length !== 3
+/* =========================================================
+   DATE FOR DATABASE
+========================================================= */
+
+function convertInputDateToDatabase(
+    date
 ) {
+
+    if (!date) {
+        return '';
+    }
+
 
     return date;
 
 }
 
-return `${parts[2]}/${parts[1]}/${parts[0]}`;
-
-}
 
 /* =========================================================
-DATE FOR DATABASE
-========================================================= */
-
-function convertInputDateToDatabase(
-date
-) {
-
-if (!date) {
-    return '';
-}
-
-return date;
-
-}
-
-/* =========================================================
-PARTICIPANT SELECTION
+   PARTICIPANT SELECTION
 ========================================================= */
 
 function saveParticipantSelection() {
 
-const selected =
-    Array.from(
-        document.querySelectorAll(
-            'input[name="participants"]:checked'
+    const selected =
+        Array.from(
+            document.querySelectorAll(
+                'input[name="participants"]:checked'
+            )
+        ).map(
+            checkbox =>
+                checkbox.value
+        );
+
+
+    savedParticipants =
+        selected;
+
+
+    localStorage.setItem(
+        'teamExpenseParticipants',
+        JSON.stringify(
+            selected
         )
-    ).map(
-        checkbox =>
-            checkbox.value
     );
-
-savedParticipants =
-    selected;
-
-localStorage.setItem(
-    'teamExpenseParticipants',
-    JSON.stringify(
-        selected
-    )
-);
 
 }
 
+
 /* =========================================================
-RESTORE PARTICIPANTS
+   RESTORE PARTICIPANTS
 ========================================================= */
 
 function restoreParticipantSelection() {
+
+    document
+        .querySelectorAll(
+            'input[name="participants"]'
+        )
+        .forEach(
+            checkbox => {
+
+                checkbox.checked =
+                    savedParticipants.includes(
+                        checkbox.value
+                    );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PARTICIPANT CHANGE
+========================================================= */
 
 document
     .querySelectorAll(
@@ -1216,812 +898,865 @@ document
     .forEach(
         checkbox => {
 
-            checkbox.checked =
-                savedParticipants.includes(
-                    checkbox.value
-                );
+            checkbox.addEventListener(
+                'change',
+                function() {
+
+                    saveParticipantSelection();
+
+                    updateSelectAllButton();
+
+                }
+            );
 
         }
     );
 
-}
 
 /* =========================================================
-PARTICIPANT CHANGE
-========================================================= */
-
-document
-.querySelectorAll(
-'input[name="participants"]'
-)
-.forEach(
-checkbox => {
-
-        checkbox.addEventListener(
-            'change',
-            function() {
-
-                saveParticipantSelection();
-
-                updateSelectAllButton();
-
-            }
-        );
-
-    }
-);
-
-/* =========================================================
-REALTIME
+   REALTIME
 ========================================================= */
 
 function setupRealtime() {
 
-supabaseClient
+    supabaseClient
 
-    .channel(
-        'room-expenses-live'
-    )
+        .channel(
+            'room-expenses-live'
+        )
 
-    .on(
-        'postgres_changes',
-        {
-            event: '*',
-            schema: 'public',
-            table: 'expenses'
-        },
-        function(payload) {
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'expenses'
+            },
+            function(payload) {
 
-            handleRealtimeChange(
-                payload
-            );
+                console.log(
+                    'Realtime change:',
+                    payload
+                );
 
-        }
-    )
 
-    .subscribe(
-        function(status) {
-
-            if (
-                status === 'SUBSCRIBED'
-            ) {
-
-                setConnectionStatus(
-                    '🟢 Connected • Live updates enabled',
-                    'text-green-600'
+                handleRealtimeChange(
+                    payload
                 );
 
             }
+        )
 
-            if (
-                status === 'CHANNEL_ERROR'
-            ) {
+        .subscribe(
+            function(status) {
 
-                setConnectionStatus(
-                    '🟡 Database connected • Live updates unavailable',
-                    'text-yellow-600'
+                console.log(
+                    'Realtime status:',
+                    status
                 );
 
-            }
-
-            if (
-                status === 'TIMED_OUT'
-            ) {
-
-                setConnectionStatus(
-                    '🟡 Live update connection timed out',
-                    'text-yellow-600'
-                );
-
-            }
-
-        }
-    );
-
-}
-
-/* =========================================================
-HANDLE REALTIME CHANGES
-========================================================= */
-
-function handleRealtimeChange(
-payload
-) {
-
-if (
-    payload.eventType ===
-    'INSERT'
-) {
-
-    const newExpense =
-        convertDatabaseExpense(
-            payload.new
-        );
-
-    const alreadyExists =
-        expenses.some(
-            expense =>
-                Number(expense.id) ===
-                Number(newExpense.id)
-        );
-
-    if (
-        !alreadyExists
-    ) {
-
-        expenses.unshift(
-            newExpense
-        );
-
-    }
-
-}
-
-else if (
-    payload.eventType ===
-    'UPDATE'
-) {
-
-    const updatedExpense =
-        convertDatabaseExpense(
-            payload.new
-        );
-
-    const index =
-        expenses.findIndex(
-            expense =>
-                Number(expense.id) ===
-                Number(
-                    updatedExpense.id
-                )
-        );
-
-    if (
-        index !== -1
-    ) {
-
-        expenses[index] =
-            updatedExpense;
-
-    }
-
-    else {
-
-        expenses.unshift(
-            updatedExpense
-        );
-
-    }
-
-}
-
-else if (
-    payload.eventType ===
-    'DELETE'
-) {
-
-    const deletedId =
-        Number(
-            payload.old.id
-        );
-
-    expenses =
-        expenses.filter(
-            expense =>
-                Number(expense.id) !==
-                deletedId
-        );
-
-}
-
-updateDashboard();
-
-}
-
-/* =========================================================
-CALCULATE TOTALS
-========================================================= */
-
-function calculateTotals() {
-
-const totals = {};
-
-members.forEach(
-    member => {
-
-        totals[member] =
-            0;
-
-    }
-);
-
-expenses.forEach(
-    expense => {
-
-        if (
-            totals[
-                expense.payer
-            ] !== undefined
-        ) {
-
-            totals[
-                expense.payer
-            ] +=
-                Number(
-                    expense.amount
-                );
-
-        }
-
-    }
-);
-
-return totals;
-
-}
-
-/* =========================================================
-CALCULATE SETTLEMENTS
-========================================================= */
-
-function calculateSettlements() {
-
-const balances = {};
-
-members.forEach(
-    member => {
-
-        balances[member] =
-            0;
-
-    }
-);
-
-expenses.forEach(
-    expense => {
-
-        const participants =
-            Array.isArray(
-                expense.participants
-            ) &&
-            expense.participants.length > 0
-
-                ? expense.participants
-
-                : members;
-
-        const share =
-            Number(
-                expense.amount
-            ) /
-            participants.length;
-
-        if (
-            balances[
-                expense.payer
-            ] !== undefined
-        ) {
-
-            balances[
-                expense.payer
-            ] +=
-                Number(
-                    expense.amount
-                );
-
-        }
-
-        participants.forEach(
-            member => {
 
                 if (
-                    balances[
-                        member
-                    ] !== undefined
+                    status === 'SUBSCRIBED'
                 ) {
 
-                    balances[
-                        member
-                    ] -=
-                        share;
+                    setConnectionStatus(
+                        '🟢 Connected • Live updates enabled',
+                        'text-green-600'
+                    );
+
+                }
+
+
+                if (
+                    status === 'CHANNEL_ERROR'
+                ) {
+
+                    setConnectionStatus(
+                        '🔴 Live update connection error',
+                        'text-red-600'
+                    );
+
+                }
+
+
+                if (
+                    status === 'TIMED_OUT'
+                ) {
+
+                    setConnectionStatus(
+                        '🟡 Live update connection timed out',
+                        'text-yellow-600'
+                    );
 
                 }
 
             }
         );
 
-    }
-);
-
-const debtors =
-    members
-
-        .filter(
-            member =>
-                balances[member] <
-                -0.01
-        )
-
-        .sort(
-            (a, b) =>
-                balances[a] -
-                balances[b]
-        );
-
-const creditors =
-    members
-
-        .filter(
-            member =>
-                balances[member] >
-                0.01
-        )
-
-        .sort(
-            (a, b) =>
-                balances[b] -
-                balances[a]
-        );
-
-const settlements = [];
-
-let i = 0;
-
-let j = 0;
-
-while (
-    i < debtors.length &&
-    j < creditors.length
-) {
-
-    const debtor =
-        debtors[i];
-
-    const creditor =
-        creditors[j];
-
-    const debt =
-        Math.abs(
-            balances[debtor]
-        );
-
-    const credit =
-        balances[creditor];
-
-    const amount =
-        Math.min(
-            debt,
-            credit
-        );
-
-    if (
-        amount > 0.01
-    ) {
-
-        settlements.push({
-
-            from:
-                debtor,
-
-            to:
-                creditor,
-
-            amount:
-                Math.round(
-                    amount * 100
-                ) / 100
-
-        });
-
-    }
-
-    balances[debtor] +=
-        amount;
-
-    balances[creditor] -=
-        amount;
-
-    if (
-        Math.abs(
-            balances[debtor]
-        ) < 0.01
-    ) {
-
-        i++;
-
-    }
-
-    if (
-        Math.abs(
-            balances[creditor]
-        ) < 0.01
-    ) {
-
-        j++;
-
-    }
-
 }
 
-return settlements;
-
-}
 
 /* =========================================================
-UPDATE DASHBOARD
+   HANDLE REALTIME CHANGES
 ========================================================= */
 
-function updateDashboard() {
+function handleRealtimeChange(
+    payload
+) {
 
-const totals =
-    calculateTotals();
 
-members.forEach(
-    member => {
+    /* =====================================================
+       INSERT
+    ====================================================== */
 
-        const element =
-            document.getElementById(
-                `${member.toLowerCase()}-total`
+    if (
+        payload.eventType ===
+        'INSERT'
+    ) {
+
+        const newExpense =
+            convertDatabaseExpense(
+                payload.new
             );
 
-        const total =
-            totals[member] ||
-            0;
 
-        const newValue =
-            `SAR ${total.toFixed(2)}`;
+        const alreadyExists =
+            expenses.some(
+                expense =>
+                    Number(expense.id) ===
+                    Number(newExpense.id)
+            );
+
 
         if (
-            element.textContent !==
-            newValue
+            !alreadyExists
         ) {
 
-            element.textContent =
-                newValue;
-
-            element.classList.remove(
-                'money-pop'
-            );
-
-            void element.offsetWidth;
-
-            element.classList.add(
-                'money-pop'
+            expenses.unshift(
+                newExpense
             );
 
         }
 
     }
-);
 
-updateSettlement();
 
-updateExpenseList();
+    /* =====================================================
+       UPDATE
+    ====================================================== */
+
+    else if (
+        payload.eventType ===
+        'UPDATE'
+    ) {
+
+        const updatedExpense =
+            convertDatabaseExpense(
+                payload.new
+            );
+
+
+        const index =
+            expenses.findIndex(
+                expense =>
+                    Number(expense.id) ===
+                    Number(
+                        updatedExpense.id
+                    )
+            );
+
+
+        if (
+            index !== -1
+        ) {
+
+            expenses[index] =
+                updatedExpense;
+
+        }
+
+        else {
+
+            expenses.unshift(
+                updatedExpense
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DELETE
+    ====================================================== */
+
+    else if (
+        payload.eventType ===
+        'DELETE'
+    ) {
+
+        const deletedId =
+            Number(
+                payload.old.id
+            );
+
+
+        expenses =
+            expenses.filter(
+                expense =>
+                    Number(expense.id) !==
+                    deletedId
+            );
+
+    }
+
+
+    updateDashboard();
 
 }
 
+
 /* =========================================================
-UPDATE SETTLEMENT
+   CALCULATE TOTALS
+========================================================= */
+
+function calculateTotals() {
+
+    const totals = {};
+
+
+    members.forEach(
+        member => {
+
+            totals[member] =
+                0;
+
+        }
+    );
+
+
+    expenses.forEach(
+        expense => {
+
+            if (
+                totals[
+                    expense.payer
+                ] !== undefined
+            ) {
+
+                totals[
+                    expense.payer
+                ] +=
+                    Number(
+                        expense.amount
+                    );
+
+            }
+
+        }
+    );
+
+
+    return totals;
+
+}
+
+
+/* =========================================================
+   CALCULATE SETTLEMENTS
+========================================================= */
+
+function calculateSettlements() {
+
+    const balances = {};
+
+
+    members.forEach(
+        member => {
+
+            balances[member] =
+                0;
+
+        }
+    );
+
+
+    expenses.forEach(
+        expense => {
+
+            const participants =
+                Array.isArray(
+                    expense.participants
+                ) &&
+                expense.participants.length > 0
+
+                    ? expense.participants
+
+                    : members;
+
+
+            const share =
+                Number(
+                    expense.amount
+                ) /
+                participants.length;
+
+
+            /*
+               Person who paid receives credit.
+            */
+
+            if (
+                balances[
+                    expense.payer
+                ] !== undefined
+            ) {
+
+                balances[
+                    expense.payer
+                ] +=
+                    Number(
+                        expense.amount
+                    );
+
+            }
+
+
+            /*
+               Each participant owes their share.
+            */
+
+            participants.forEach(
+                member => {
+
+                    if (
+                        balances[
+                            member
+                        ] !== undefined
+                    ) {
+
+                        balances[
+                            member
+                        ] -=
+                            share;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    const debtors =
+        members
+
+            .filter(
+                member =>
+                    balances[member] <
+                    -0.01
+            )
+
+            .sort(
+                (a, b) =>
+                    balances[a] -
+                    balances[b]
+            );
+
+
+    const creditors =
+        members
+
+            .filter(
+                member =>
+                    balances[member] >
+                    0.01
+            )
+
+            .sort(
+                (a, b) =>
+                    balances[b] -
+                    balances[a]
+            );
+
+
+    const settlements = [];
+
+
+    let i = 0;
+
+    let j = 0;
+
+
+    while (
+        i < debtors.length &&
+        j < creditors.length
+    ) {
+
+        const debtor =
+            debtors[i];
+
+
+        const creditor =
+            creditors[j];
+
+
+        const debt =
+            Math.abs(
+                balances[debtor]
+            );
+
+
+        const credit =
+            balances[creditor];
+
+
+        const amount =
+            Math.min(
+                debt,
+                credit
+            );
+
+
+        if (
+            amount > 0.01
+        ) {
+
+            settlements.push({
+
+                from:
+                    debtor,
+
+                to:
+                    creditor,
+
+                amount:
+                    Math.round(
+                        amount * 100
+                    ) / 100
+
+            });
+
+        }
+
+
+        balances[debtor] +=
+            amount;
+
+
+        balances[creditor] -=
+            amount;
+
+
+        if (
+            Math.abs(
+                balances[debtor]
+            ) < 0.01
+        ) {
+
+            i++;
+
+        }
+
+
+        if (
+            Math.abs(
+                balances[creditor]
+            ) < 0.01
+        ) {
+
+            j++;
+
+        }
+
+    }
+
+
+    return settlements;
+
+}
+
+
+/* =========================================================
+   UPDATE DASHBOARD
+========================================================= */
+
+function updateDashboard() {
+
+    const totals =
+        calculateTotals();
+
+
+    members.forEach(
+        member => {
+
+            const total =
+                totals[member] ||
+                0;
+
+
+            document.getElementById(
+                `${member.toLowerCase()}-total`
+            ).textContent =
+                `SAR ${total.toFixed(2)}`;
+
+        }
+    );
+
+
+    updateSettlement();
+
+    updateExpenseList();
+
+}
+
+
+/* =========================================================
+   UPDATE SETTLEMENT
 ========================================================= */
 
 function updateSettlement() {
 
-const settlementDiv =
-    document.getElementById(
-        'settlement-info'
-    );
+    const settlementDiv =
+        document.getElementById(
+            'settlement-info'
+        );
 
-const settlements =
-    calculateSettlements();
 
-if (
-    expenses.length === 0
-) {
+    const settlements =
+        calculateSettlements();
 
-    settlementDiv.innerHTML = `
-        <p class="text-gray-600">
-            Add some expenses to see who owes whom!
-        </p>
-    `;
 
-    return;
+    if (
+        expenses.length === 0
+    ) {
 
-}
+        settlementDiv.innerHTML = `
+            <p class="text-gray-600">
+                Add some expenses to see who owes whom!
+            </p>
+        `;
 
-if (
-    settlements.length === 0
-) {
+        return;
 
-    settlementDiv.innerHTML = `
-        <p class="success-message text-green-600 font-semibold">
-            🎉 All settled up! No one owes anyone.
-        </p>
-    `;
+    }
 
-    return;
 
-}
+    if (
+        settlements.length === 0
+    ) {
 
-settlementDiv.innerHTML =
-    settlements
+        settlementDiv.innerHTML = `
+            <p class="text-green-600 font-semibold">
+                🎉 All settled up! No one owes anyone.
+            </p>
+        `;
 
-        .map(
-            (settlement, index) => `
+        return;
 
-                <div
-                    class="
-                        settlement-item
-                        flex
-                        items-center
-                        justify-between
-                        bg-yellow-50
-                        border
-                        border-yellow-200
-                        p-4
-                        rounded-lg
-                    "
-                    style="animation-delay: ${index * 0.08}s"
-                >
+    }
 
-                    <span
-                        class="text-gray-800"
-                    >
 
-                        <strong>
-                            ${escapeHtml(
-                                settlement.from
-                            )}
-                        </strong>
+    settlementDiv.innerHTML =
+        settlements
 
-                        owes
+            .map(
+                settlement => `
 
-                        <strong>
-                            ${escapeHtml(
-                                settlement.to
-                            )}
-                        </strong>
-
-                    </span>
-
-                    <span
+                    <div
                         class="
-                            font-bold
-                            text-yellow-600
-                            text-lg
+                            flex
+                            items-center
+                            justify-between
+                            bg-yellow-50
+                            border
+                            border-yellow-200
+                            p-4
+                            rounded-lg
                         "
                     >
 
-                        SAR ${settlement.amount.toFixed(2)}
+                        <span
+                            class="text-gray-800"
+                        >
 
-                    </span>
+                            <strong>
+                                ${escapeHtml(
+                                    settlement.from
+                                )}
+                            </strong>
 
-                </div>
+                            owes
 
-            `
-        )
+                            <strong>
+                                ${escapeHtml(
+                                    settlement.to
+                                )}
+                            </strong>
 
-        .join('');
+                        </span>
+
+
+                        <span
+                            class="
+                                font-bold
+                                text-yellow-600
+                                text-lg
+                            "
+                        >
+
+                            SAR ${settlement.amount.toFixed(2)}
+
+                        </span>
+
+                    </div>
+
+                `
+            )
+
+            .join('');
 
 }
 
+
 /* =========================================================
-UPDATE EXPENSE LIST
+   UPDATE EXPENSE LIST
 ========================================================= */
 
 function updateExpenseList() {
 
-const expensesList =
-    document.getElementById(
-        'expenses-list'
-    );
+    const expensesList =
+        document.getElementById(
+            'expenses-list'
+        );
 
-if (
-    expenses.length === 0
-) {
 
-    expensesList.innerHTML = `
-        <p class="text-gray-600 text-center py-8">
-            No expenses added yet.
-            Add your first expense above!
-        </p>
-    `;
+    if (
+        expenses.length === 0
+    ) {
 
-    return;
+        expensesList.innerHTML = `
+            <p class="text-gray-600 text-center py-8">
+                No expenses added yet.
+                Add your first expense above!
+            </p>
+        `;
 
-}
+        return;
 
-expensesList.innerHTML =
-    expenses
+    }
 
-        .map(
-            (expense, index) => {
 
-                const participants =
-                    Array.isArray(
-                        expense.participants
-                    ) &&
-                    expense.participants.length > 0
+    expensesList.innerHTML =
+        expenses
 
-                        ? expense.participants
+            .map(
+                expense => {
 
-                        : members;
+                    const participants =
+                        Array.isArray(
+                            expense.participants
+                        ) &&
+                        expense.participants.length > 0
 
-                const share =
-                    Number(
-                        expense.amount
-                    ) /
-                    participants.length;
+                            ? expense.participants
 
-                return `
+                            : members;
 
-                    <div
-                        class="
-                            expense-item
-                            bg-gray-50
-                            border
-                            border-gray-200
-                            p-4
-                            rounded-lg
-                        "
-                        style="animation-delay: ${Math.min(index * 0.05, 0.5)}s"
-                    >
+
+                    const share =
+                        Number(
+                            expense.amount
+                        ) /
+                        participants.length;
+
+
+                    return `
 
                         <div
                             class="
-                                flex
-                                flex-col
-                                md:flex-row
-                                md:items-center
-                                md:justify-between
-                                gap-4
+                                bg-gray-50
+                                border
+                                border-gray-200
+                                p-4
+                                rounded-lg
                             "
                         >
 
-                            <div class="flex-1">
+                            <div
+                                class="
+                                    flex
+                                    flex-col
+                                    md:flex-row
+                                    md:items-center
+                                    md:justify-between
+                                    gap-4
+                                "
+                            >
 
-                                <p
-                                    class="
-                                        font-semibold
-                                        text-gray-800
-                                        text-lg
-                                    "
-                                >
 
-                                    ${escapeHtml(
-                                        expense.description
-                                    )}
+                                <!-- INFORMATION -->
 
-                                </p>
+                                <div class="flex-1">
 
-                                <p
-                                    class="
-                                        text-sm
-                                        text-gray-600
-                                        mt-1
-                                    "
-                                >
-
-                                    Paid by
-
-                                    <span
-                                        class="font-medium"
+                                    <p
+                                        class="
+                                            font-semibold
+                                            text-gray-800
+                                            text-lg
+                                        "
                                     >
 
                                         ${escapeHtml(
-                                            expense.payer
+                                            expense.description
                                         )}
 
-                                    </span>
+                                    </p>
 
-                                    on
 
-                                    ${escapeHtml(
-                                        expense.date
-                                    )}
-
-                                </p>
-
-                                <p
-                                    class="
-                                        text-sm
-                                        text-blue-600
-                                        mt-2
-                                    "
-                                >
-
-                                    👥 Split between:
-
-                                    <span
-                                        class="font-medium"
-                                    >
-
-                                        ${participants
-                                            .map(
-                                                participant =>
-                                                    escapeHtml(
-                                                        participant
-                                                    )
-                                            )
-                                            .join(', ')}
-
-                                    </span>
-
-                                </p>
-
-                            </div>
-
-                            <div class="text-right">
-
-                                <p
-                                    class="
-                                        font-bold
-                                        text-gray-800
-                                        text-lg
-                                    "
-                                >
-
-                                    SAR ${Number(
-                                        expense.amount
-                                    ).toFixed(2)}
-
-                                </p>
-
-                                <p
-                                    class="
-                                        text-sm
-                                        text-gray-500
-                                        mb-3
-                                    "
-                                >
-
-                                    SAR ${share.toFixed(2)}
-                                    each
-
-                                </p>
-
-                                <div
-                                    class="
-                                        flex
-                                        gap-2
-                                        justify-end
-                                    "
-                                >
-
-                                    <button
-                                        onclick="editExpense(${expense.id})"
+                                    <p
                                         class="
-                                            bg-blue-500
-                                            hover:bg-blue-600
-                                            text-white
-                                            px-3
-                                            py-2
-                                            rounded-lg
                                             text-sm
-                                            font-medium
+                                            text-gray-600
+                                            mt-1
                                         "
                                     >
 
-                                        ✏️ Edit
+                                        Paid by
 
-                                    </button>
+                                        <span
+                                            class="font-medium"
+                                        >
 
-                                    <button
-                                        onclick="deleteExpense(${expense.id})"
+                                            ${escapeHtml(
+                                                expense.payer
+                                            )}
+
+                                        </span>
+
+                                        on
+
+                                        ${escapeHtml(
+                                            expense.date
+                                        )}
+
+                                    </p>
+
+
+                                    <p
                                         class="
-                                            bg-red-500
-                                            hover:bg-red-600
-                                            text-white
-                                            px-3
-                                            py-2
-                                            rounded-lg
                                             text-sm
-                                            font-medium
+                                            text-blue-600
+                                            mt-2
                                         "
                                     >
 
-                                        🗑️ Delete
+                                        👥 Split between:
 
-                                    </button>
+                                        <span
+                                            class="font-medium"
+                                        >
+
+                                            ${participants
+                                                .map(
+                                                    participant =>
+                                                        escapeHtml(
+                                                            participant
+                                                        )
+                                                )
+                                                .join(', ')}
+
+                                        </span>
+
+                                    </p>
+
+                                </div>
+
+
+                                <!-- AMOUNT -->
+
+                                <div class="text-right">
+
+                                    <p
+                                        class="
+                                            font-bold
+                                            text-gray-800
+                                            text-lg
+                                        "
+                                    >
+
+                                        SAR ${Number(
+                                            expense.amount
+                                        ).toFixed(2)}
+
+                                    </p>
+
+
+                                    <p
+                                        class="
+                                            text-sm
+                                            text-gray-500
+                                            mb-3
+                                        "
+                                    >
+
+                                        SAR ${share.toFixed(2)}
+                                        each
+
+                                    </p>
+
+
+                                    <div
+                                        class="
+                                            flex
+                                            gap-2
+                                            justify-end
+                                        "
+                                    >
+
+
+                                        <button
+                                            onclick="editExpense(${expense.id})"
+                                            class="
+                                                bg-blue-500
+                                                hover:bg-blue-600
+                                                text-white
+                                                px-3
+                                                py-2
+                                                rounded-lg
+                                                text-sm
+                                                font-medium
+                                                transition
+                                            "
+                                        >
+
+                                            ✏️ Edit
+
+                                        </button>
+
+
+                                        <button
+                                            onclick="deleteExpense(${expense.id})"
+                                            class="
+                                                bg-red-500
+                                                hover:bg-red-600
+                                                text-white
+                                                px-3
+                                                py-2
+                                                rounded-lg
+                                                text-sm
+                                                font-medium
+                                                transition
+                                            "
+                                        >
+
+                                            🗑️ Delete
+
+                                        </button>
+
+                                    </div>
 
                                 </div>
 
@@ -2029,744 +1764,851 @@ expensesList.innerHTML =
 
                         </div>
 
-                    </div>
+                    `;
 
-                `;
+                }
+            )
 
-            }
-        )
-
-        .join('');
+            .join('');
 
 }
 
+
 /* =========================================================
-EDIT EXPENSE
+   EDIT EXPENSE
 ========================================================= */
 
 function editExpense(
-id
+    id
 ) {
 
-const expense =
-    expenses.find(
-        item =>
-            Number(item.id) ===
-            Number(id)
+    const expense =
+        expenses.find(
+            item =>
+                Number(item.id) ===
+                Number(id)
+        );
+
+
+    if (!expense) {
+        return;
+    }
+
+
+    editingExpenseId =
+        Number(id);
+
+
+    document.getElementById(
+        'form-title'
+    ).textContent =
+        '✏️ Edit Expense';
+
+
+    document.getElementById(
+        'submit-btn'
+    ).textContent =
+        'Update Expense';
+
+
+    document.getElementById(
+        'submit-btn'
+    ).classList.remove(
+        'bg-blue-600',
+        'hover:bg-blue-700'
     );
 
-if (!expense) {
-    return;
+
+    document.getElementById(
+        'submit-btn'
+    ).classList.add(
+        'bg-green-600',
+        'hover:bg-green-700'
+    );
+
+
+    document.getElementById(
+        'cancel-edit-btn'
+    ).classList.remove(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'payer'
+    ).value =
+        expense.payer;
+
+
+    document.getElementById(
+        'amount'
+    ).value =
+        expense.amount;
+
+
+    document.getElementById(
+        'description'
+    ).value =
+        expense.description;
+
+
+    document.getElementById(
+        'expense-date'
+    ).value =
+        convertDisplayDateToInput(
+            expense.date
+        );
+
+
+    const participants =
+        Array.isArray(
+            expense.participants
+        )
+            ? expense.participants
+            : members;
+
+
+    document
+        .querySelectorAll(
+            'input[name="participants"]'
+        )
+        .forEach(
+            checkbox => {
+
+                checkbox.checked =
+                    participants.includes(
+                        checkbox.value
+                    );
+
+            }
+        );
+
+
+    updateSelectAllButton();
+
+
+    document
+        .getElementById(
+            'expense-form'
+        )
+        .scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
 }
 
-editingExpenseId =
-    Number(id);
 
-document.getElementById(
-    'form-title'
-).textContent =
-    '✏️ Edit Expense';
+/* =========================================================
+   DISPLAY DATE -> INPUT DATE
+========================================================= */
 
-document.getElementById(
-    'submit-btn'
-).textContent =
-    'Update Expense';
+function convertDisplayDateToInput(
+    date
+) {
 
-document.getElementById(
-    'submit-btn'
-).classList.remove(
-    'bg-blue-600',
-    'hover:bg-blue-700'
-);
+    if (!date) {
+        return '';
+    }
 
-document.getElementById(
-    'submit-btn'
-).classList.add(
-    'bg-green-600',
-    'hover:bg-green-700'
-);
 
-document.getElementById(
-    'cancel-edit-btn'
-).classList.remove(
-    'hidden'
-);
+    const parts =
+        date.split('/');
 
-document.getElementById(
-    'payer'
-).value =
-    expense.payer;
 
-document.getElementById(
-    'amount'
-).value =
-    expense.amount;
+    if (
+        parts.length === 3
+    ) {
 
-document.getElementById(
-    'description'
-).value =
-    expense.description;
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
 
-document.getElementById(
-    'expense-date'
-).value =
-    convertDisplayDateToInput(
-        expense.date
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================================
+   UPDATE EXPENSE IN SUPABASE
+========================================================= */
+
+async function updateExpense(
+    id,
+    payer,
+    amount,
+    description,
+    date,
+    participants
+) {
+
+    const {
+        error
+    } =
+        await supabaseClient
+
+            .from('expenses')
+
+            .update({
+
+                payer:
+                    payer,
+
+                amount:
+                    parseFloat(amount),
+
+                description:
+                    description,
+
+                expense_date:
+                    convertInputDateToDatabase(
+                        date
+                    ),
+
+                participants:
+                    participants
+
+            })
+
+            .eq(
+                'id',
+                id
+            );
+
+
+    if (error) {
+
+        console.error(
+            'Update error:',
+            error
+        );
+
+
+        alert(
+            'Could not update expense.\n\n' +
+            error.message
+        );
+
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   DELETE EXPENSE
+========================================================= */
+
+async function deleteExpense(
+    id
+) {
+
+    const expense =
+        expenses.find(
+            item =>
+                Number(item.id) ===
+                Number(id)
+        );
+
+
+    if (!expense) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            `Delete "${expense.description}" for SAR ${Number(expense.amount).toFixed(2)}?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+
+            .from('expenses')
+
+            .delete()
+
+            .eq(
+                'id',
+                id
+            );
+
+
+    if (error) {
+
+        console.error(
+            'Delete error:',
+            error
+        );
+
+
+        alert(
+            'Could not delete expense.\n\n' +
+            error.message
+        );
+
+
+        return;
+
+    }
+
+}
+
+
+/* =========================================================
+   CANCEL EDIT
+========================================================= */
+
+function cancelEdit() {
+
+    editingExpenseId =
+        null;
+
+
+    document.getElementById(
+        'form-title'
+    ).textContent =
+        '➕ Add New Expense';
+
+
+    document.getElementById(
+        'submit-btn'
+    ).textContent =
+        'Add Expense';
+
+
+    document.getElementById(
+        'submit-btn'
+    ).classList.remove(
+        'bg-green-600',
+        'hover:bg-green-700'
     );
 
-const participants =
-    Array.isArray(
-        expense.participants
-    )
-        ? expense.participants
-        : members;
 
-document
-    .querySelectorAll(
-        'input[name="participants"]'
-    )
-    .forEach(
-        checkbox => {
-
-            checkbox.checked =
-                participants.includes(
-                    checkbox.value
-                );
-
-        }
+    document.getElementById(
+        'submit-btn'
+    ).classList.add(
+        'bg-blue-600',
+        'hover:bg-blue-700'
     );
 
-updateSelectAllButton();
+
+    document.getElementById(
+        'cancel-edit-btn'
+    ).classList.add(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'amount'
+    ).value =
+        '';
+
+
+    document.getElementById(
+        'description'
+    ).value =
+        '';
+
+
+    document.getElementById(
+        'payer'
+    ).value =
+        'Amal';
+
+
+    setToday();
+
+
+    restoreParticipantSelection();
+
+    updateSelectAllButton();
+
+}
+
+
+/* =========================================================
+   FORM SUBMIT
+========================================================= */
 
 document
     .getElementById(
         'expense-form'
     )
-    .scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-    });
+    .addEventListener(
+        'submit',
+        async function(e) {
 
-}
+            e.preventDefault();
 
-/* =========================================================
-DISPLAY DATE -> INPUT DATE
-========================================================= */
 
-function convertDisplayDateToInput(
-date
-) {
+            const payer =
+                document.getElementById(
+                    'payer'
+                ).value;
 
-if (!date) {
-    return '';
-}
 
-const parts =
-    date.split('/');
-
-if (
-    parts.length === 3
-) {
-
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-
-}
-
-return date;
-
-}
-
-/* =========================================================
-UPDATE EXPENSE IN SUPABASE
-========================================================= */
-
-async function updateExpense(
-id,
-payer,
-amount,
-description,
-date,
-participants
-) {
-
-const {
-    error
-} =
-    await supabaseClient
-
-        .from('expenses')
-
-        .update({
-
-            payer:
-                payer,
-
-            amount:
-                parseFloat(amount),
-
-            description:
-                description,
-
-            expense_date:
-                convertInputDateToDatabase(
-                    date
-                ),
-
-            participants:
-                participants
-
-        })
-
-        .eq(
-            'id',
-            id
-        );
-
-if (error) {
-
-    console.error(
-        'Update error:',
-        error
-    );
-
-    alert(
-        'Could not update expense.\n\n' +
-        error.message
-    );
-
-    return false;
-
-}
-
-return true;
-
-}
-
-/* =========================================================
-DELETE EXPENSE
-========================================================= */
-
-async function deleteExpense(
-id
-) {
-
-const expense =
-    expenses.find(
-        item =>
-            Number(item.id) ===
-            Number(id)
-    );
-
-if (!expense) {
-    return;
-}
-
-const confirmed =
-    confirm(
-        `Delete "${expense.description}" for SAR ${Number(expense.amount).toFixed(2)}?`
-    );
-
-if (!confirmed) {
-    return;
-}
-
-const {
-    error
-} =
-    await supabaseClient
-
-        .from('expenses')
-
-        .delete()
-
-        .eq(
-            'id',
-            id
-        );
-
-if (error) {
-
-    console.error(
-        'Delete error:',
-        error
-    );
-
-    alert(
-        'Could not delete expense.\n\n' +
-        error.message
-    );
-
-    return;
-
-}
-
-}
-
-/* =========================================================
-CANCEL EDIT
-========================================================= */
-
-function cancelEdit() {
-
-editingExpenseId =
-    null;
-
-document.getElementById(
-    'form-title'
-).textContent =
-    '➕ Add New Expense';
-
-document.getElementById(
-    'submit-btn'
-).textContent =
-    'Add Expense';
-
-document.getElementById(
-    'submit-btn'
-).classList.remove(
-    'bg-green-600',
-    'hover:bg-green-700'
-);
-
-document.getElementById(
-    'submit-btn'
-).classList.add(
-    'bg-blue-600',
-    'hover:bg-blue-700'
-);
-
-document.getElementById(
-    'cancel-edit-btn'
-).classList.add(
-    'hidden'
-);
-
-document.getElementById(
-    'amount'
-).value =
-    '';
-
-document.getElementById(
-    'description'
-).value =
-    '';
-
-document.getElementById(
-    'payer'
-).value =
-    'Amal';
-
-setToday();
-
-restoreParticipantSelection();
-
-updateSelectAllButton();
-
-}
-
-/* =========================================================
-FORM SUBMIT
-========================================================= */
-
-document
-.getElementById(
-'expense-form'
-)
-.addEventListener(
-'submit',
-async function(e) {
-
-        e.preventDefault();
-
-        const payer =
-            document.getElementById(
-                'payer'
-            ).value;
-
-        const amount =
-            document.getElementById(
-                'amount'
-            ).value;
-
-        const description =
-            document.getElementById(
-                'description'
-            ).value.trim();
-
-        const dateInput =
-            document.getElementById(
-                'expense-date'
-            ).value;
-
-        const participants =
-            Array.from(
-                document.querySelectorAll(
-                    'input[name="participants"]:checked'
-                )
-            ).map(
-                input =>
-                    input.value
-            );
-
-        if (
-            !amount ||
-            parseFloat(amount) <= 0
-        ) {
-
-            alert(
-                'Please enter a valid amount.'
-            );
-
-            return;
-
-        }
-
-        if (!description) {
-
-            alert(
-                'Please enter a description.'
-            );
-
-            return;
-
-        }
-
-        if (
-            participants.length === 0
-        ) {
-
-            alert(
-                'Please select at least one person.'
-            );
-
-            return;
-
-        }
-
-        saveParticipantSelection();
-
-        const button =
-            document.getElementById(
-                'submit-btn'
-            );
-
-        button.disabled =
-            true;
-
-        button.textContent =
-            'Saving...';
-
-        try {
-
-            if (
-                editingExpenseId !==
-                null
-            ) {
-
-                const success =
-                    await updateExpense(
-                        editingExpenseId,
-                        payer,
-                        amount,
-                        description,
-                        dateInput,
-                        participants
-                    );
-
-                if (success) {
-
-                    cancelEdit();
-
-                }
-
-            }
-
-            else {
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-
-                        .from('expenses')
-
-                        .insert({
-
-                            payer:
-                                payer,
-
-                            amount:
-                                parseFloat(
-                                    amount
-                                ),
-
-                            description:
-                                description,
-
-                            expense_date:
-                                dateInput,
-
-                            participants:
-                                participants
-
-                        });
-
-                if (error) {
-
-                    console.error(
-                        'Insert error:',
-                        error
-                    );
-
-                    alert(
-                        'Could not save expense.\n\n' +
-                        error.message
-                    );
-
-                    return;
-
-                }
-
+            const amount =
                 document.getElementById(
                     'amount'
-                ).value =
-                    '';
+                ).value;
 
+
+            const description =
                 document.getElementById(
                     'description'
-                ).value =
-                    '';
+                ).value.trim();
 
-                setToday();
 
-                restoreParticipantSelection();
+            const dateInput =
+                document.getElementById(
+                    'expense-date'
+                ).value;
 
-                updateSelectAllButton();
 
-            }
+            const participants =
+                Array.from(
+                    document.querySelectorAll(
+                        'input[name="participants"]:checked'
+                    )
+                ).map(
+                    input =>
+                        input.value
+                );
 
-        }
 
-        finally {
-
-            button.disabled =
-                false;
+            /* =================================================
+               VALIDATION
+            ================================================== */
 
             if (
-                editingExpenseId !==
-                null
+                !amount ||
+                parseFloat(amount) <= 0
             ) {
 
-                button.textContent =
-                    'Update Expense';
+                alert(
+                    'Please enter a valid amount.'
+                );
+
+                return;
 
             }
 
-            else {
 
-                button.textContent =
-                    'Add Expense';
+            if (!description) {
+
+                alert(
+                    'Please enter a description.'
+                );
+
+                return;
+
+            }
+
+
+            if (
+                participants.length === 0
+            ) {
+
+                alert(
+                    'Please select at least one person.'
+                );
+
+                return;
+
+            }
+
+
+            saveParticipantSelection();
+
+
+            const button =
+                document.getElementById(
+                    'submit-btn'
+                );
+
+
+            button.disabled =
+                true;
+
+
+            button.textContent =
+                'Saving...';
+
+
+            try {
+
+
+                /* =============================================
+                   UPDATE EXISTING EXPENSE
+                ============================================== */
+
+                if (
+                    editingExpenseId !==
+                    null
+                ) {
+
+                    const success =
+                        await updateExpense(
+                            editingExpenseId,
+                            payer,
+                            amount,
+                            description,
+                            dateInput,
+                            participants
+                        );
+
+
+                    if (success) {
+
+                        cancelEdit();
+
+                    }
+
+                }
+
+
+                /* =============================================
+                   ADD NEW EXPENSE
+                ============================================== */
+
+                else {
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+
+                            .from('expenses')
+
+                            .insert({
+
+                                payer:
+                                    payer,
+
+                                amount:
+                                    parseFloat(
+                                        amount
+                                    ),
+
+                                description:
+                                    description,
+
+                                expense_date:
+                                    dateInput,
+
+                                participants:
+                                    participants
+
+                            });
+
+
+                    if (error) {
+
+                        console.error(
+                            'Insert error:',
+                            error
+                        );
+
+
+                        alert(
+                            'Could not save expense.\n\n' +
+                            error.message
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                       The Supabase Realtime event will
+                       automatically add the expense to
+                       this page and every other page.
+                    */
+
+
+                    document.getElementById(
+                        'amount'
+                    ).value =
+                        '';
+
+
+                    document.getElementById(
+                        'description'
+                    ).value =
+                        '';
+
+
+                    setToday();
+
+
+                    restoreParticipantSelection();
+
+                    updateSelectAllButton();
+
+                }
+
+            }
+
+            finally {
+
+                button.disabled =
+                    false;
+
+
+                if (
+                    editingExpenseId !==
+                    null
+                ) {
+
+                    button.textContent =
+                        'Update Expense';
+
+                }
+
+                else {
+
+                    button.textContent =
+                        'Add Expense';
+
+                }
 
             }
 
         }
+    );
 
-    }
-);
 
 /* =========================================================
-CANCEL EDIT BUTTON
+   CANCEL EDIT BUTTON
 ========================================================= */
 
 document
-.getElementById(
-'cancel-edit-btn'
-)
-.addEventListener(
-'click',
-cancelEdit
-);
+    .getElementById(
+        'cancel-edit-btn'
+    )
+    .addEventListener(
+        'click',
+        cancelEdit
+    );
+
 
 /* =========================================================
-SELECT / DESELECT ALL
+   SELECT / DESELECT ALL
 ========================================================= */
 
 document
-.getElementById(
-'select-all-btn'
-)
-.addEventListener(
-'click',
-function() {
+    .getElementById(
+        'select-all-btn'
+    )
+    .addEventListener(
+        'click',
+        function() {
 
-        const checkboxes =
-            document.querySelectorAll(
-                'input[name="participants"]'
+            const checkboxes =
+                document.querySelectorAll(
+                    'input[name="participants"]'
+                );
+
+
+            const allSelected =
+                Array.from(
+                    checkboxes
+                ).every(
+                    checkbox =>
+                        checkbox.checked
+                );
+
+
+            checkboxes.forEach(
+                checkbox => {
+
+                    checkbox.checked =
+                        !allSelected;
+
+                }
             );
 
-        const allSelected =
-            Array.from(
-                checkboxes
-            ).every(
-                checkbox =>
-                    checkbox.checked
-            );
 
-        checkboxes.forEach(
-            checkbox => {
+            saveParticipantSelection();
 
-                checkbox.checked =
-                    !allSelected;
+            updateSelectAllButton();
 
-            }
-        );
+        }
+    );
 
-        saveParticipantSelection();
-
-        updateSelectAllButton();
-
-    }
-);
 
 /* =========================================================
-UPDATE SELECT ALL BUTTON
+   UPDATE SELECT ALL BUTTON
 ========================================================= */
 
 function updateSelectAllButton() {
 
-const checkboxes =
-    document.querySelectorAll(
-        'input[name="participants"]'
-    );
+    const checkboxes =
+        document.querySelectorAll(
+            'input[name="participants"]'
+        );
 
-const allSelected =
-    Array.from(
-        checkboxes
-    ).every(
-        checkbox =>
-            checkbox.checked
-    );
 
-document.getElementById(
-    'select-all-btn'
-).textContent =
-    allSelected
-        ? 'Deselect All'
-        : 'Select All';
+    const allSelected =
+        Array.from(
+            checkboxes
+        ).every(
+            checkbox =>
+                checkbox.checked
+        );
+
+
+    document.getElementById(
+        'select-all-btn'
+    ).textContent =
+        allSelected
+            ? 'Deselect All'
+            : 'Select All';
 
 }
 
+
 /* =========================================================
-RESET MONTH
+   RESET MONTH
 ========================================================= */
 
 document
-.getElementById(
-'reset-btn'
-)
-.addEventListener(
-'click',
-async function() {
+    .getElementById(
+        'reset-btn'
+    )
+    .addEventListener(
+        'click',
+        async function() {
 
-        if (
-            expenses.length === 0
-        ) {
+            if (
+                expenses.length === 0
+            ) {
 
-            alert(
-                'There are no expenses to reset.'
-            );
-
-            return;
-
-        }
-
-        const confirmed =
-            confirm(
-                'Are you sure you want to delete ALL expenses? This cannot be undone.'
-            );
-
-        if (!confirmed) {
-            return;
-        }
-
-        const {
-            error
-        } =
-            await supabaseClient
-
-                .from('expenses')
-
-                .delete()
-
-                .not(
-                    'id',
-                    'is',
-                    null
+                alert(
+                    'There are no expenses to reset.'
                 );
 
-        if (error) {
+                return;
 
-            console.error(
-                'Reset error:',
+            }
+
+
+            const confirmed =
+                confirm(
+                    'Are you sure you want to delete ALL expenses? This cannot be undone.'
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            const {
                 error
-            );
+            } =
+                await supabaseClient
 
-            alert(
-                'Could not reset expenses.\n\n' +
-                error.message
-            );
+                    .from('expenses')
 
-            return;
+                    .delete()
+
+                    .not(
+                        'id',
+                        'is',
+                        null
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    'Reset error:',
+                    error
+                );
+
+
+                alert(
+                    'Could not reset expenses.\n\n' +
+                    error.message
+                );
+
+
+                return;
+
+            }
+
+
+            cancelEdit();
 
         }
+    );
 
-        cancelEdit();
-
-    }
-);
 
 /* =========================================================
-ESCAPE HTML
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHtml(
-value
+    value
 ) {
 
-return String(value)
+    return String(value)
 
-    .replace(
-        /&/g,
-        '&amp;'
-    )
+        .replace(
+            /&/g,
+            '&amp;'
+        )
 
-    .replace(
-        /</g,
-        '&lt;'
-    )
+        .replace(
+            /</g,
+            '&lt;'
+        )
 
-    .replace(
-        />/g,
-        '&gt;'
-    )
+        .replace(
+            />/g,
+            '&gt;'
+        )
 
-    .replace(
-        /"/g,
-        '&quot;'
-    )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
 
-    .replace(
-        /'/g,
-        '&#039;'
-    );
+        .replace(
+            /'/g,
+            '&#039;'
+        );
 
 }
 
-//key and database functionality are included,
+
 /* =========================================================
-INITIAL EMPTY DASHBOARD
+   INITIAL EMPTY DASHBOARD
 ========================================================= */
 
 updateDashboard();
 
-</script> </body> </html>
+</script>
+
+</body>
+
+</html>
