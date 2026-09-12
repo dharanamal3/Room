@@ -998,31 +998,73 @@ LOAD EXPENSES
 
 async function loadExpenses() {
 
-setConnectionStatus(
-    'Loading expenses...',
-    'text-yellow-600'
-);
+    setConnectionStatus(
+        '🟡 Connecting to database...',
+        'text-yellow-600'
+    );
 
-const {
-    data,
-    error
-} =
-    await supabaseClient
-        .from('expenses')
-        .select('*')
-        .order(
-            'expense_date',
-            {
+    console.log('Supabase URL:', SUPABASE_URL);
+    console.log('Supabase client:', supabaseClient);
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from('expenses')
+            .select('*')
+            .order('expense_date', {
                 ascending: false
-            }
+            });
+
+        console.log('Supabase response:', {
+            data,
+            error
+        });
+
+        if (error) {
+
+            console.error('Supabase error:', error);
+
+            setConnectionStatus(
+                '🔴 Database error: ' + error.message,
+                'text-red-600'
+            );
+
+            alert(
+                'Supabase database error:\n\n' +
+                error.message
+            );
+
+            return;
+        }
+
+        expenses = data.map(convertDatabaseExpense);
+
+        updateDashboard();
+
+        setConnectionStatus(
+            '🟢 Connected • Live updates enabled',
+            'text-green-600'
         );
 
-if (error) {
+    } catch (error) {
 
-    console.error(
-        'Load expenses error:',
-        error
-    );
+        console.error('Connection exception:', error);
+
+        setConnectionStatus(
+            '🔴 Connection failed',
+            'text-red-600'
+        );
+
+        alert(
+            'Could not connect to Supabase:\n\n' +
+            error.message
+        );
+    }
+}
+
 
     setConnectionStatus(
         '🔴 Database error',
