@@ -620,6 +620,8 @@
         "
     >
 
+        <!-- TOTAL EXPENSES -->
+
         <div
             class="
                 analysis-card
@@ -649,13 +651,15 @@
                     text-3xl
                     font-bold
                     text-blue-600
-                "
+            "
             >
                 SAR 0.00
             </p>
 
         </div>
 
+
+        <!-- NUMBER OF EXPENSES -->
 
         <div
             class="
@@ -694,6 +698,8 @@
         </div>
 
 
+        <!-- AVERAGE PER DAY -->
+
         <div
             class="
                 analysis-card
@@ -714,11 +720,11 @@
                     mb-2
                 "
             >
-                Average Expense
+                Average Per Day
             </p>
 
             <p
-                id="average-expense"
+                id="average-day"
                 class="
                     text-3xl
                     font-bold
@@ -730,6 +736,8 @@
 
         </div>
 
+
+        <!-- DAYS IN PERIOD -->
 
         <div
             class="
@@ -751,18 +759,18 @@
                     mb-2
                 "
             >
-                Average Per Day
+                Expense Period
             </p>
 
             <p
-                id="average-day"
+                id="expense-days"
                 class="
                     text-3xl
                     font-bold
                     text-orange-600
                 "
             >
-                SAR 0.00
+                0 days
             </p>
 
         </div>
@@ -784,16 +792,38 @@
         "
     >
 
-        <h2
+        <div
             class="
-                text-2xl
-                font-bold
-                text-gray-800
+                flex
+                flex-col
+                md:flex-row
+                md:justify-between
+                md:items-center
+                gap-2
                 mb-6
             "
         >
-            👥 Spending By Person
-        </h2>
+
+            <h2
+                class="
+                    text-2xl
+                    font-bold
+                    text-gray-800
+                "
+            >
+                👥 Spending By Person
+            </h2>
+
+            <span
+                id="person-period"
+                class="
+                    text-sm
+                    text-gray-500
+                "
+            >
+            </span>
+
+        </div>
 
 
         <div
@@ -1793,6 +1823,84 @@ function applyQuickRange(
 
 
 /* =========================================================
+   GET NUMBER OF DAYS
+   FROM FIRST EXPENSE TO LAST EXPENSE
+========================================================= */
+
+function getExpensePeriodDays(
+    expenses
+) {
+
+    if (
+        !expenses ||
+        expenses.length === 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    const dates =
+        expenses
+            .map(
+                expense =>
+                    expense.expense_date
+            )
+            .filter(Boolean)
+            .sort();
+
+
+    if (
+        dates.length === 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    const firstDate =
+        new Date(
+            `${dates[0]}T00:00:00`
+        );
+
+
+    const lastDate =
+        new Date(
+            `${dates[dates.length - 1]}T00:00:00`
+        );
+
+
+    if (
+        isNaN(firstDate) ||
+        isNaN(lastDate)
+    ) {
+
+        return 0;
+
+    }
+
+
+    const millisecondsPerDay =
+        1000 *
+        60 *
+        60 *
+        24;
+
+
+    return Math.floor(
+        (
+            lastDate -
+            firstDate
+        ) /
+        millisecondsPerDay
+    ) + 1;
+
+}
+
+
+/* =========================================================
    RENDER EVERYTHING
 ========================================================= */
 
@@ -1832,43 +1940,16 @@ function updateSummary() {
         filteredExpenses.length;
 
 
-    const average =
-        count > 0
-            ? total / count
+    const numberOfDays =
+        getExpensePeriodDays(
+            filteredExpenses
+        );
+
+
+    const averagePerDay =
+        numberOfDays > 0
+            ? total / numberOfDays
             : 0;
-
-
-    let averagePerDay = 0;
-
-if (count > 0) {
-
-    const dates = filteredExpenses
-        .map(expense => new Date(expense.expense_date))
-        .filter(date => !isNaN(date));
-
-    if (dates.length > 0) {
-
-        const firstDate =
-            new Date(Math.min(...dates));
-
-        const lastDate =
-            new Date(Math.max(...dates));
-
-        // Include both the first and last day
-        const millisecondsPerDay =
-            1000 * 60 * 60 * 24;
-
-        const numberOfDays =
-            Math.floor(
-                (lastDate - firstDate) /
-                millisecondsPerDay
-            ) + 1;
-
-        averagePerDay =
-            total / numberOfDays;
-    }
-}
-
 
 
     document.getElementById(
@@ -1884,17 +1965,21 @@ if (count > 0) {
 
 
     document.getElementById(
-        'average-expense'
-    ).textContent =
-        formatMoney(average);
-
-
-    document.getElementById(
         'average-day'
     ).textContent =
         formatMoney(
             averagePerDay
         );
+
+
+    document.getElementById(
+        'expense-days'
+    ).textContent =
+        `${numberOfDays} ${
+            numberOfDays === 1
+                ? 'day'
+                : 'days'
+        }`;
 
 }
 
@@ -1911,6 +1996,12 @@ function updatePersonAnalysis() {
         );
 
 
+    const periodElement =
+        document.getElementById(
+            'person-period'
+        );
+
+
     const totals = {};
 
 
@@ -1924,6 +2015,10 @@ function updatePersonAnalysis() {
     );
 
 
+    /* =====================================================
+       CALCULATE EACH PERSON'S SHARE
+    ====================================================== */
+
     filteredExpenses.forEach(
         expense => {
 
@@ -1931,6 +2026,15 @@ function updatePersonAnalysis() {
                 getParticipants(
                     expense
                 );
+
+
+            if (
+                participants.length === 0
+            ) {
+
+                return;
+
+            }
 
 
             const share =
@@ -1958,6 +2062,38 @@ function updatePersonAnalysis() {
     );
 
 
+    /* =====================================================
+       CALCULATE EXPENSE PERIOD
+    ====================================================== */
+
+    const numberOfDays =
+        getExpensePeriodDays(
+            filteredExpenses
+        );
+
+
+    if (
+        numberOfDays > 0
+    ) {
+
+        periodElement.textContent =
+            `Average calculated over ${numberOfDays} ${
+                numberOfDays === 1
+                    ? 'day'
+                    : 'days'
+            }`;
+
+    } else {
+
+        periodElement.textContent = '';
+
+    }
+
+
+    /* =====================================================
+       BAR MAXIMUM
+    ====================================================== */
+
     const max =
         Math.max(
             ...Object.values(totals),
@@ -1965,17 +2101,46 @@ function updatePersonAnalysis() {
         );
 
 
+    /* =====================================================
+       NO DATA
+    ====================================================== */
+
+    if (
+        filteredExpenses.length === 0 ||
+        numberOfDays === 0
+    ) {
+
+        container.innerHTML = `
+            <p class="text-gray-500">
+                No expenses found for this period.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       RENDER EACH PERSON
+    ====================================================== */
+
     container.innerHTML =
         members.map(
             member => {
 
-                const value =
+                const total =
                     totals[member];
+
+
+                const averagePerDay =
+                    total /
+                    numberOfDays;
 
 
                 const percentage =
                     (
-                        value /
+                        total /
                         max
                     ) *
                     100;
@@ -1988,28 +2153,61 @@ function updatePersonAnalysis() {
                         <div
                             class="
                                 flex
-                                justify-between
+                                flex-col
+                                sm:flex-row
+                                sm:justify-between
+                                sm:items-center
+                                gap-2
                                 mb-2
                             "
                         >
 
-                            <span
-                                class="
-                                    font-semibold
-                                    text-gray-700
-                                "
-                            >
-                                ${escapeHtml(member)}
-                            </span>
+                            <div>
 
-                            <span
+                                <span
+                                    class="
+                                        font-semibold
+                                        text-gray-700
+                                    "
+                                >
+                                    ${escapeHtml(member)}
+                                </span>
+
+                            </div>
+
+
+                            <div
                                 class="
-                                    font-bold
-                                    text-gray-800
+                                    text-left
+                                    sm:text-right
                                 "
                             >
-                                ${formatMoney(value)}
-                            </span>
+
+                                <div
+                                    class="
+                                        font-bold
+                                        text-gray-800
+                                    "
+                                >
+                                    Total:
+                                    ${formatMoney(total)}
+                                </div>
+
+
+                                <div
+                                    class="
+                                        text-sm
+                                        font-semibold
+                                        text-purple-600
+                                    "
+                                >
+                                    ${formatMoney(
+                                        averagePerDay
+                                    )}
+                                    / day
+                                </div>
+
+                            </div>
 
                         </div>
 
@@ -2695,8 +2893,10 @@ function updateHistory() {
 
 
                     const share =
-                        expense.amount /
-                        participants.length;
+                        participants.length > 0
+                            ? expense.amount /
+                              participants.length
+                            : 0;
 
 
                     return `
