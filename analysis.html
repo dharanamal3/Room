@@ -1838,28 +1838,37 @@ function updateSummary() {
             : 0;
 
 
-    let averagePerDay =
-        0;
+    let averagePerDay = 0;
 
+if (count > 0) {
 
-    if (count > 0) {
+    const dates = filteredExpenses
+        .map(expense => new Date(expense.expense_date))
+        .filter(date => !isNaN(date));
 
-        const dates =
-            [
-                ...new Set(
-                    filteredExpenses.map(
-                        expense =>
-                            expense.expense_date
-                    )
-                )
-            ];
+    if (dates.length > 0) {
 
+        const firstDate =
+            new Date(Math.min(...dates));
+
+        const lastDate =
+            new Date(Math.max(...dates));
+
+        // Include both the first and last day
+        const millisecondsPerDay =
+            1000 * 60 * 60 * 24;
+
+        const numberOfDays =
+            Math.floor(
+                (lastDate - firstDate) /
+                millisecondsPerDay
+            ) + 1;
 
         averagePerDay =
-            total /
-            dates.length;
-
+            total / numberOfDays;
     }
+}
+
 
 
     document.getElementById(
