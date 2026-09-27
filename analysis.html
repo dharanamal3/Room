@@ -1,0 +1,3034 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Room Expense Tracker - Analysis</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+
+        @import url(
+            'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'
+        );
+
+
+        /* =====================================================
+           BASE
+        ====================================================== */
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            animation:
+                pageFadeIn
+                0.6s
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes pageFadeIn {
+
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+
+        }
+
+
+        /* =====================================================
+           CARD ANIMATION
+        ====================================================== */
+
+        .analysis-card {
+
+            opacity: 0;
+
+            transform:
+                translateY(20px);
+
+            animation:
+                cardIn
+                0.6s
+                cubic-bezier(
+                    0.22,
+                    1,
+                    0.36,
+                    1
+                )
+                forwards;
+
+        }
+
+
+        .analysis-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .analysis-card:nth-child(2) {
+            animation-delay: 0.10s;
+        }
+
+        .analysis-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .analysis-card:nth-child(4) {
+            animation-delay: 0.20s;
+        }
+
+
+        @keyframes cardIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(20px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* =====================================================
+           HOVER
+        ====================================================== */
+
+        .hover-card {
+
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease;
+
+        }
+
+
+        .hover-card:hover {
+
+            transform:
+                translateY(-4px);
+
+            box-shadow:
+                0 15px 35px
+                rgba(0, 0, 0, 0.10);
+
+        }
+
+
+        /* =====================================================
+           BAR
+        ====================================================== */
+
+        .bar {
+
+            width: 0;
+
+            animation:
+                barGrow
+                0.8s
+                cubic-bezier(
+                    0.22,
+                    1,
+                    0.36,
+                    1
+                )
+                forwards;
+
+        }
+
+
+        @keyframes barGrow {
+
+            from {
+                width: 0;
+            }
+
+        }
+
+
+        /* =====================================================
+           TABLE ROW
+        ====================================================== */
+
+        .history-row {
+
+            animation:
+                rowIn
+                0.35s
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes rowIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(8px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* =====================================================
+           SCROLLBAR
+        ====================================================== */
+
+        ::-webkit-scrollbar {
+
+            width: 8px;
+
+        }
+
+
+        ::-webkit-scrollbar-track {
+
+            background:
+                #f1f5f9;
+
+        }
+
+
+        ::-webkit-scrollbar-thumb {
+
+            background:
+                #94a3b8;
+
+            border-radius:
+                999px;
+
+        }
+
+
+        /* =====================================================
+           REDUCED MOTION
+        ====================================================== */
+
+        @media (
+            prefers-reduced-motion: reduce
+        ) {
+
+            *,
+            *::before,
+            *::after {
+
+                animation-duration:
+                    0.01ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                transition-duration:
+                    0.01ms !important;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body
+    class="
+        min-h-screen
+        bg-gradient-to-br
+        from-blue-50
+        to-indigo-100
+    "
+>
+
+
+<div
+    class="
+        container
+        mx-auto
+        px-4
+        py-8
+        max-w-7xl
+    "
+>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="text-center mb-8">
+
+        <div
+            class="
+                flex
+                flex-col
+                sm:flex-row
+                justify-center
+                items-center
+                gap-3
+                mb-4
+            "
+        >
+
+            <a
+                href="index.html"
+                class="
+                    bg-white
+                    hover:bg-gray-50
+                    text-gray-700
+                    font-semibold
+                    px-4
+                    py-2
+                    rounded-lg
+                    shadow
+                "
+            >
+                ← Dashboard
+            </a>
+
+        </div>
+
+
+        <h1
+            class="
+                text-4xl
+                md:text-5xl
+                font-bold
+                text-gray-800
+                mb-3
+            "
+        >
+            📊 Expense Analysis
+        </h1>
+
+
+        <p class="text-gray-600">
+
+            Complete expense history and spending analysis
+
+        </p>
+
+
+        <p class="text-gray-500 text-sm mt-2">
+
+            Archived expenses are kept here for historical analysis.
+
+        </p>
+
+
+        <p
+            id="connection-status"
+            class="
+                text-sm
+                text-gray-500
+                mt-3
+            "
+        >
+            Connecting to database...
+
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTERS
+    ====================================================== -->
+
+    <div
+        class="
+            bg-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <div
+            class="
+                flex
+                flex-col
+                md:flex-row
+                md:items-end
+                gap-4
+            "
+        >
+
+            <!-- MONTH -->
+
+            <div class="flex-1">
+
+                <label
+                    class="
+                        block
+                        text-sm
+                        font-semibold
+                        text-gray-700
+                        mb-2
+                    "
+                >
+                    Month
+                </label>
+
+                <input
+                    type="month"
+                    id="month-filter"
+                    class="
+                        w-full
+                        px-4
+                        py-3
+                        border
+                        border-gray-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-blue-500
+                    "
+                >
+
+            </div>
+
+
+            <!-- FROM -->
+
+            <div class="flex-1">
+
+                <label
+                    class="
+                        block
+                        text-sm
+                        font-semibold
+                        text-gray-700
+                        mb-2
+                    "
+                >
+                    From Date
+                </label>
+
+                <input
+                    type="date"
+                    id="from-date"
+                    class="
+                        w-full
+                        px-4
+                        py-3
+                        border
+                        border-gray-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-blue-500
+                    "
+                >
+
+            </div>
+
+
+            <!-- TO -->
+
+            <div class="flex-1">
+
+                <label
+                    class="
+                        block
+                        text-sm
+                        font-semibold
+                        text-gray-700
+                        mb-2
+                    "
+                >
+                    To Date
+                </label>
+
+                <input
+                    type="date"
+                    id="to-date"
+                    class="
+                        w-full
+                        px-4
+                        py-3
+                        border
+                        border-gray-300
+                        rounded-lg
+                        focus:ring-2
+                        focus:ring-blue-500
+                    "
+                >
+
+            </div>
+
+
+            <!-- FILTER BUTTON -->
+
+            <button
+                id="apply-filter"
+                class="
+                    bg-blue-600
+                    hover:bg-blue-700
+                    text-white
+                    font-semibold
+                    px-6
+                    py-3
+                    rounded-lg
+                "
+            >
+                Apply Filter
+            </button>
+
+
+            <!-- ALL BUTTON -->
+
+            <button
+                id="all-data"
+                class="
+                    bg-gray-600
+                    hover:bg-gray-700
+                    text-white
+                    font-semibold
+                    px-6
+                    py-3
+                    rounded-lg
+                "
+            >
+                All History
+            </button>
+
+        </div>
+
+
+        <div
+            class="
+                flex
+                flex-wrap
+                gap-2
+                mt-4
+            "
+        >
+
+            <button
+                data-range="this-month"
+                class="
+                    range-btn
+                    bg-blue-50
+                    hover:bg-blue-100
+                    text-blue-700
+                    px-3
+                    py-2
+                    rounded-lg
+                    text-sm
+                    font-medium
+                "
+            >
+                This Month
+            </button>
+
+
+            <button
+                data-range="last-month"
+                class="
+                    range-btn
+                    bg-blue-50
+                    hover:bg-blue-100
+                    text-blue-700
+                    px-3
+                    py-2
+                    rounded-lg
+                    text-sm
+                    font-medium
+                "
+            >
+                Last Month
+            </button>
+
+
+            <button
+                data-range="this-year"
+                class="
+                    range-btn
+                    bg-blue-50
+                    hover:bg-blue-100
+                    text-blue-700
+                    px-3
+                    py-2
+                    rounded-lg
+                    text-sm
+                    font-medium
+                "
+            >
+                This Year
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
+    <div
+        class="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-4
+            gap-5
+            mb-8
+        "
+    >
+
+        <div
+            class="
+                analysis-card
+                hover-card
+                bg-white
+                rounded-xl
+                shadow-lg
+                p-6
+                border-l-4
+                border-blue-500
+            "
+        >
+
+            <p
+                class="
+                    text-sm
+                    text-gray-500
+                    mb-2
+                "
+            >
+                Total Expenses
+            </p>
+
+            <p
+                id="total-expenses"
+                class="
+                    text-3xl
+                    font-bold
+                    text-blue-600
+                "
+            >
+                SAR 0.00
+            </p>
+
+        </div>
+
+
+        <div
+            class="
+                analysis-card
+                hover-card
+                bg-white
+                rounded-xl
+                shadow-lg
+                p-6
+                border-l-4
+                border-green-500
+            "
+        >
+
+            <p
+                class="
+                    text-sm
+                    text-gray-500
+                    mb-2
+                "
+            >
+                Number of Expenses
+            </p>
+
+            <p
+                id="expense-count"
+                class="
+                    text-3xl
+                    font-bold
+                    text-green-600
+                "
+            >
+                0
+            </p>
+
+        </div>
+
+
+        <div
+            class="
+                analysis-card
+                hover-card
+                bg-white
+                rounded-xl
+                shadow-lg
+                p-6
+                border-l-4
+                border-purple-500
+            "
+        >
+
+            <p
+                class="
+                    text-sm
+                    text-gray-500
+                    mb-2
+                "
+            >
+                Average Expense
+            </p>
+
+            <p
+                id="average-expense"
+                class="
+                    text-3xl
+                    font-bold
+                    text-purple-600
+                "
+            >
+                SAR 0.00
+            </p>
+
+        </div>
+
+
+        <div
+            class="
+                analysis-card
+                hover-card
+                bg-white
+                rounded-xl
+                shadow-lg
+                p-6
+                border-l-4
+                border-orange-500
+            "
+        >
+
+            <p
+                class="
+                    text-sm
+                    text-gray-500
+                    mb-2
+                "
+            >
+                Average Per Day
+            </p>
+
+            <p
+                id="average-day"
+                class="
+                    text-3xl
+                    font-bold
+                    text-orange-600
+                "
+            >
+                SAR 0.00
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PERSON ANALYSIS
+    ====================================================== -->
+
+    <div
+        class="
+            bg-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <h2
+            class="
+                text-2xl
+                font-bold
+                text-gray-800
+                mb-6
+            "
+        >
+            👥 Spending By Person
+        </h2>
+
+
+        <div
+            id="person-analysis"
+            class="space-y-5"
+        >
+
+            <p class="text-gray-500">
+                Loading...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MONTHLY ANALYSIS
+    ====================================================== -->
+
+    <div
+        class="
+            bg-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <div
+            class="
+                flex
+                flex-col
+                md:flex-row
+                md:justify-between
+                md:items-center
+                gap-3
+                mb-6
+            "
+        >
+
+            <h2
+                class="
+                    text-2xl
+                    font-bold
+                    text-gray-800
+                "
+            >
+                📅 Month-wise Spending
+            </h2>
+
+            <span
+                id="monthly-total"
+                class="
+                    text-sm
+                    font-semibold
+                    text-gray-500
+                "
+            >
+            </span>
+
+        </div>
+
+
+        <div
+            id="monthly-analysis"
+            class="space-y-4"
+        >
+
+            <p class="text-gray-500">
+                Loading...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DATE-WISE ANALYSIS
+    ====================================================== -->
+
+    <div
+        class="
+            bg-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <h2
+            class="
+                text-2xl
+                font-bold
+                text-gray-800
+                mb-6
+            "
+        >
+            📆 Date-wise Spending
+        </h2>
+
+
+        <div
+            id="daily-analysis"
+            class="space-y-3"
+        >
+
+            <p class="text-gray-500">
+                Loading...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAYER ANALYSIS
+    ====================================================== -->
+
+    <div
+        class="
+            bg-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <h2
+            class="
+                text-2xl
+                font-bold
+                text-gray-800
+                mb-6
+            "
+        >
+            💳 Amount Paid By Each Person
+        </h2>
+
+
+        <div
+            id="payer-analysis"
+            class="space-y-4"
+        >
+
+            <p class="text-gray-500">
+                Loading...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ARCHIVED SUMMARY
+    ====================================================== -->
+
+    <div
+        class="
+            bg-gradient-to-r
+            from-indigo-600
+            to-blue-600
+            text-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <h2
+            class="
+                text-2xl
+                font-bold
+                mb-4
+            "
+        >
+            🗄️ Historical Data
+        </h2>
+
+
+        <div
+            class="
+                grid
+                grid-cols-1
+                md:grid-cols-3
+                gap-6
+            "
+        >
+
+            <div>
+
+                <p
+                    class="
+                        text-blue-100
+                        text-sm
+                    "
+                >
+                    Archived Expenses
+                </p>
+
+                <p
+                    id="archived-count"
+                    class="
+                        text-3xl
+                        font-bold
+                    "
+                >
+                    0
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <p
+                    class="
+                        text-blue-100
+                        text-sm
+                    "
+                >
+                    Archived Amount
+                </p>
+
+                <p
+                    id="archived-total"
+                    class="
+                        text-3xl
+                        font-bold
+                    "
+                >
+                    SAR 0.00
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <p
+                    class="
+                        text-blue-100
+                        text-sm
+                    "
+                >
+                    Historical Months
+                </p>
+
+                <p
+                    id="historical-months"
+                    class="
+                        text-3xl
+                        font-bold
+                    "
+                >
+                    0
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         EXPENSE HISTORY
+    ====================================================== -->
+
+    <div
+        class="
+            bg-white
+            rounded-xl
+            shadow-lg
+            p-6
+            mb-8
+        "
+    >
+
+        <div
+            class="
+                flex
+                flex-col
+                md:flex-row
+                md:justify-between
+                md:items-center
+                gap-3
+                mb-6
+            "
+        >
+
+            <h2
+                class="
+                    text-2xl
+                    font-bold
+                    text-gray-800
+                "
+            >
+                📋 Expense History
+            </h2>
+
+
+            <span
+                id="history-count"
+                class="
+                    text-sm
+                    text-gray-500
+                "
+            >
+            </span>
+
+        </div>
+
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full">
+
+                <thead>
+
+                    <tr
+                        class="
+                            border-b
+                            border-gray-200
+                            text-left
+                            text-sm
+                            text-gray-500
+                        "
+                    >
+
+                        <th class="p-3">
+                            Date
+                        </th>
+
+                        <th class="p-3">
+                            Description
+                        </th>
+
+                        <th class="p-3">
+                            Paid By
+                        </th>
+
+                        <th class="p-3">
+                            Participants
+                        </th>
+
+                        <th class="p-3 text-right">
+                            Amount
+                        </th>
+
+                        <th class="p-3">
+                            Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="history-table"
+                >
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+    'https://zxsffkqtaoovpnodpvpu.supabase.co';
+
+
+const SUPABASE_ANON_KEY =
+    'sb_publishable_2R7BzqIJf_CIi_cukwvuig_FZ3d72dI';
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+
+
+/* =========================================================
+   MEMBERS
+========================================================= */
+
+const members = [
+    'Amal',
+    'Ebin',
+    'Farhan',
+    'Shabin'
+];
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+let allExpenses = [];
+
+let filteredExpenses = [];
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    async function() {
+
+        setDefaultDates();
+
+        setupFilters();
+
+        await loadExpenses();
+
+    }
+);
+
+
+/* =========================================================
+   SET DEFAULT DATES
+========================================================= */
+
+function setDefaultDates() {
+
+    const today =
+        new Date();
+
+
+    const year =
+        today.getFullYear();
+
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(
+            2,
+            '0'
+        );
+
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(
+            2,
+            '0'
+        );
+
+
+    document.getElementById(
+        'month-filter'
+    ).value =
+        `${year}-${month}`;
+
+
+    document.getElementById(
+        'from-date'
+    ).value =
+        `${year}-${month}-01`;
+
+
+    document.getElementById(
+        'to-date'
+    ).value =
+        `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================================
+   CONNECTION
+========================================================= */
+
+function setConnectionStatus(
+    message,
+    className
+) {
+
+    const element =
+        document.getElementById(
+            'connection-status'
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        `text-sm mt-3 ${className}`;
+
+}
+
+
+/* =========================================================
+   LOAD ALL EXPENSES
+========================================================= */
+
+async function loadExpenses() {
+
+    setConnectionStatus(
+        'Loading complete expense history...',
+        'text-yellow-600'
+    );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from('expenses')
+
+            .select('*')
+
+            .order(
+                'expense_date',
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            'Analysis load error:',
+            error
+        );
+
+
+        setConnectionStatus(
+            '🔴 Database error',
+            'text-red-600'
+        );
+
+
+        alert(
+            'Could not load expense history.\n\n' +
+            error.message
+        );
+
+
+        return;
+
+    }
+
+
+    allExpenses =
+        data.map(
+            convertExpense
+        );
+
+
+    filteredExpenses =
+        [...allExpenses];
+
+
+    updateHistoricalSummary();
+
+    applyMonthFilter();
+
+
+    setConnectionStatus(
+        '🟢 Connected • Historical data loaded',
+        'text-green-600'
+    );
+
+}
+
+
+/* =========================================================
+   CONVERT
+========================================================= */
+
+function convertExpense(
+    row
+) {
+
+    return {
+
+        id:
+            row.id,
+
+        payer:
+            row.payer,
+
+        amount:
+            Number(
+                row.amount
+            ),
+
+        description:
+            row.description,
+
+        expense_date:
+            row.expense_date,
+
+        participants:
+            Array.isArray(
+                row.participants
+            )
+                ? row.participants
+                : members,
+
+        is_archived:
+            row.is_archived === true
+
+    };
+
+}
+
+
+/* =========================================================
+   FILTER SETUP
+========================================================= */
+
+function setupFilters() {
+
+    document
+        .getElementById(
+            'apply-filter'
+        )
+        .addEventListener(
+            'click',
+            applyCustomFilter
+        );
+
+
+    document
+        .getElementById(
+            'all-data'
+        )
+        .addEventListener(
+            'click',
+            function() {
+
+                document.getElementById(
+                    'month-filter'
+                ).value = '';
+
+
+                document.getElementById(
+                    'from-date'
+                ).value = '';
+
+
+                document.getElementById(
+                    'to-date'
+                ).value = '';
+
+
+                filteredExpenses =
+                    [...allExpenses];
+
+
+                renderAll();
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            '.range-btn'
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    'click',
+                    function() {
+
+                        applyQuickRange(
+                            button.dataset.range
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            'month-filter'
+        )
+        .addEventListener(
+            'change',
+            function() {
+
+                const month =
+                    this.value;
+
+
+                if (!month) {
+                    return;
+                }
+
+
+                const [year, monthNumber] =
+                    month.split('-');
+
+
+                const start =
+                    `${year}-${monthNumber}-01`;
+
+
+                const lastDay =
+                    new Date(
+                        Number(year),
+                        Number(monthNumber),
+                        0
+                    ).getDate();
+
+
+                const end =
+                    `${year}-${monthNumber}-${String(lastDay).padStart(2, '0')}`;
+
+
+                document.getElementById(
+                    'from-date'
+                ).value =
+                    start;
+
+
+                document.getElementById(
+                    'to-date'
+                ).value =
+                    end;
+
+
+                applyMonthFilter();
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   MONTH FILTER
+========================================================= */
+
+function applyMonthFilter() {
+
+    const month =
+        document.getElementById(
+            'month-filter'
+        ).value;
+
+
+    if (!month) {
+
+        filteredExpenses =
+            [...allExpenses];
+
+        renderAll();
+
+        return;
+
+    }
+
+
+    filteredExpenses =
+        allExpenses.filter(
+            expense =>
+                expense.expense_date
+                    .startsWith(month)
+        );
+
+
+    renderAll();
+
+}
+
+
+/* =========================================================
+   CUSTOM DATE FILTER
+========================================================= */
+
+function applyCustomFilter() {
+
+    const from =
+        document.getElementById(
+            'from-date'
+        ).value;
+
+
+    const to =
+        document.getElementById(
+            'to-date'
+        ).value;
+
+
+    if (!from || !to) {
+
+        alert(
+            'Please select both From Date and To Date.'
+        );
+
+        return;
+
+    }
+
+
+    if (from > to) {
+
+        alert(
+            'From Date cannot be after To Date.'
+        );
+
+        return;
+
+    }
+
+
+    filteredExpenses =
+        allExpenses.filter(
+            expense =>
+                expense.expense_date >= from &&
+                expense.expense_date <= to
+        );
+
+
+    document.getElementById(
+        'month-filter'
+    ).value = '';
+
+
+    renderAll();
+
+}
+
+
+/* =========================================================
+   QUICK RANGE
+========================================================= */
+
+function applyQuickRange(
+    range
+) {
+
+    const now =
+        new Date();
+
+
+    let from;
+
+    let to;
+
+
+    if (
+        range === 'this-month'
+    ) {
+
+        const year =
+            now.getFullYear();
+
+
+        const month =
+            String(
+                now.getMonth() + 1
+            ).padStart(
+                2,
+                '0'
+            );
+
+
+        from =
+            `${year}-${month}-01`;
+
+
+        to =
+            formatDate(
+                now
+            );
+
+    }
+
+
+    if (
+        range === 'last-month'
+    ) {
+
+        const date =
+            new Date(
+                now.getFullYear(),
+                now.getMonth() - 1,
+                1
+            );
+
+
+        const year =
+            date.getFullYear();
+
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(
+                2,
+                '0'
+            );
+
+
+        from =
+            `${year}-${month}-01`;
+
+
+        const lastDay =
+            new Date(
+                year,
+                date.getMonth() + 1,
+                0
+            ).getDate();
+
+
+        to =
+            `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+
+    }
+
+
+    if (
+        range === 'this-year'
+    ) {
+
+        const year =
+            now.getFullYear();
+
+
+        from =
+            `${year}-01-01`;
+
+
+        to =
+            `${year}-12-31`;
+
+    }
+
+
+    document.getElementById(
+        'month-filter'
+    ).value = '';
+
+
+    document.getElementById(
+        'from-date'
+    ).value =
+        from;
+
+
+    document.getElementById(
+        'to-date'
+    ).value =
+        to;
+
+
+    filteredExpenses =
+        allExpenses.filter(
+            expense =>
+                expense.expense_date >= from &&
+                expense.expense_date <= to
+        );
+
+
+    renderAll();
+
+}
+
+
+/* =========================================================
+   RENDER EVERYTHING
+========================================================= */
+
+function renderAll() {
+
+    updateSummary();
+
+    updatePersonAnalysis();
+
+    updateMonthlyAnalysis();
+
+    updateDailyAnalysis();
+
+    updatePayerAnalysis();
+
+    updateHistory();
+
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+function updateSummary() {
+
+    const total =
+        filteredExpenses.reduce(
+            (sum, expense) =>
+                sum +
+                expense.amount,
+            0
+        );
+
+
+    const count =
+        filteredExpenses.length;
+
+
+    const average =
+        count > 0
+            ? total / count
+            : 0;
+
+
+    let averagePerDay =
+        0;
+
+
+    if (count > 0) {
+
+        const dates =
+            [
+                ...new Set(
+                    filteredExpenses.map(
+                        expense =>
+                            expense.expense_date
+                    )
+                )
+            ];
+
+
+        averagePerDay =
+            total /
+            dates.length;
+
+    }
+
+
+    document.getElementById(
+        'total-expenses'
+    ).textContent =
+        formatMoney(total);
+
+
+    document.getElementById(
+        'expense-count'
+    ).textContent =
+        count;
+
+
+    document.getElementById(
+        'average-expense'
+    ).textContent =
+        formatMoney(average);
+
+
+    document.getElementById(
+        'average-day'
+    ).textContent =
+        formatMoney(
+            averagePerDay
+        );
+
+}
+
+
+/* =========================================================
+   PERSON ANALYSIS
+========================================================= */
+
+function updatePersonAnalysis() {
+
+    const container =
+        document.getElementById(
+            'person-analysis'
+        );
+
+
+    const totals = {};
+
+
+    members.forEach(
+        member => {
+
+            totals[member] =
+                0;
+
+        }
+    );
+
+
+    filteredExpenses.forEach(
+        expense => {
+
+            const participants =
+                getParticipants(
+                    expense
+                );
+
+
+            const share =
+                expense.amount /
+                participants.length;
+
+
+            participants.forEach(
+                member => {
+
+                    if (
+                        totals[member] !==
+                        undefined
+                    ) {
+
+                        totals[member] +=
+                            share;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    const max =
+        Math.max(
+            ...Object.values(totals),
+            1
+        );
+
+
+    container.innerHTML =
+        members.map(
+            member => {
+
+                const value =
+                    totals[member];
+
+
+                const percentage =
+                    (
+                        value /
+                        max
+                    ) *
+                    100;
+
+
+                return `
+
+                    <div>
+
+                        <div
+                            class="
+                                flex
+                                justify-between
+                                mb-2
+                            "
+                        >
+
+                            <span
+                                class="
+                                    font-semibold
+                                    text-gray-700
+                                "
+                            >
+                                ${escapeHtml(member)}
+                            </span>
+
+                            <span
+                                class="
+                                    font-bold
+                                    text-gray-800
+                                "
+                            >
+                                ${formatMoney(value)}
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                h-4
+                                bg-gray-100
+                                rounded-full
+                                overflow-hidden
+                            "
+                        >
+
+                            <div
+                                class="
+                                    bar
+                                    h-full
+                                    bg-gradient-to-r
+                                    from-blue-500
+                                    to-indigo-600
+                                    rounded-full
+                                "
+                                style="
+                                    width:
+                                    ${percentage}%;
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        )
+        .join('');
+
+}
+
+
+/* =========================================================
+   MONTHLY ANALYSIS
+========================================================= */
+
+function updateMonthlyAnalysis() {
+
+    const container =
+        document.getElementById(
+            'monthly-analysis'
+        );
+
+
+    const monthly = {};
+
+
+    filteredExpenses.forEach(
+        expense => {
+
+            const month =
+                expense.expense_date
+                    .substring(
+                        0,
+                        7
+                    );
+
+
+            if (
+                !monthly[month]
+            ) {
+
+                monthly[month] =
+                    0;
+
+            }
+
+
+            monthly[month] +=
+                expense.amount;
+
+        }
+    );
+
+
+    const entries =
+        Object.entries(
+            monthly
+        )
+        .sort(
+            (a, b) =>
+                b[0].localeCompare(
+                    a[0]
+                )
+        );
+
+
+    if (
+        entries.length === 0
+    ) {
+
+        container.innerHTML = `
+            <p class="text-gray-500">
+                No expenses found for this period.
+            </p>
+        `;
+
+        document.getElementById(
+            'monthly-total'
+        ).textContent = '';
+
+        return;
+
+    }
+
+
+    const max =
+        Math.max(
+            ...entries.map(
+                item =>
+                    item[1]
+            ),
+            1
+        );
+
+
+    const total =
+        entries.reduce(
+            (
+                sum,
+                item
+            ) =>
+                sum +
+                item[1],
+            0
+        );
+
+
+    document.getElementById(
+        'monthly-total'
+    ).textContent =
+        `Total: ${formatMoney(total)}`;
+
+
+    container.innerHTML =
+        entries.map(
+            ([month, amount]) => {
+
+                const percentage =
+                    (
+                        amount /
+                        max
+                    ) *
+                    100;
+
+
+                return `
+
+                    <div>
+
+                        <div
+                            class="
+                                flex
+                                justify-between
+                                items-center
+                                mb-2
+                            "
+                        >
+
+                            <span
+                                class="
+                                    font-semibold
+                                    text-gray-700
+                                "
+                            >
+                                ${formatMonth(month)}
+                            </span>
+
+                            <span
+                                class="
+                                    font-bold
+                                    text-gray-800
+                                "
+                            >
+                                ${formatMoney(amount)}
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                h-5
+                                bg-gray-100
+                                rounded-full
+                                overflow-hidden
+                            "
+                        >
+
+                            <div
+                                class="
+                                    bar
+                                    h-full
+                                    bg-gradient-to-r
+                                    from-purple-500
+                                    to-pink-500
+                                    rounded-full
+                                "
+                                style="
+                                    width:
+                                    ${percentage}%;
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        )
+        .join('');
+
+}
+
+
+/* =========================================================
+   DAILY ANALYSIS
+========================================================= */
+
+function updateDailyAnalysis() {
+
+    const container =
+        document.getElementById(
+            'daily-analysis'
+        );
+
+
+    const daily = {};
+
+
+    filteredExpenses.forEach(
+        expense => {
+
+            if (
+                !daily[
+                    expense.expense_date
+                ]
+            ) {
+
+                daily[
+                    expense.expense_date
+                ] = 0;
+
+            }
+
+
+            daily[
+                expense.expense_date
+            ] +=
+                expense.amount;
+
+        }
+    );
+
+
+    const entries =
+        Object.entries(
+            daily
+        )
+        .sort(
+            (a, b) =>
+                b[0].localeCompare(
+                    a[0]
+                )
+        );
+
+
+    if (
+        entries.length === 0
+    ) {
+
+        container.innerHTML = `
+            <p class="text-gray-500">
+                No daily data available.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    const max =
+        Math.max(
+            ...entries.map(
+                item =>
+                    item[1]
+            ),
+            1
+        );
+
+
+    container.innerHTML =
+        entries.map(
+            ([date, amount], index) => {
+
+                const percentage =
+                    (
+                        amount /
+                        max
+                    ) *
+                    100;
+
+
+                return `
+
+                    <div
+                        class="
+                            history-row
+                            border-b
+                            border-gray-100
+                            pb-3
+                        "
+                        style="
+                            animation-delay:
+                            ${Math.min(
+                                index * 0.03,
+                                0.5
+                            )}s
+                        "
+                    >
+
+                        <div
+                            class="
+                                flex
+                                justify-between
+                                items-center
+                                gap-4
+                            "
+                        >
+
+                            <span
+                                class="
+                                    font-medium
+                                    text-gray-700
+                                    min-w-[110px]
+                                "
+                            >
+                                ${formatDisplayDate(date)}
+                            </span>
+
+
+                            <div
+                                class="
+                                    flex-1
+                                    h-3
+                                    bg-gray-100
+                                    rounded-full
+                                    overflow-hidden
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        bar
+                                        h-full
+                                        bg-blue-500
+                                        rounded-full
+                                    "
+                                    style="
+                                        width:
+                                        ${percentage}%;
+                                    "
+                                ></div>
+
+                            </div>
+
+
+                            <span
+                                class="
+                                    font-bold
+                                    text-gray-800
+                                    min-w-[100px]
+                                    text-right
+                                "
+                            >
+                                ${formatMoney(amount)}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        )
+        .join('');
+
+}
+
+
+/* =========================================================
+   PAYER ANALYSIS
+========================================================= */
+
+function updatePayerAnalysis() {
+
+    const container =
+        document.getElementById(
+            'payer-analysis'
+        );
+
+
+    const totals = {};
+
+
+    members.forEach(
+        member => {
+
+            totals[member] =
+                0;
+
+        }
+    );
+
+
+    filteredExpenses.forEach(
+        expense => {
+
+            if (
+                totals[
+                    expense.payer
+                ] !== undefined
+            ) {
+
+                totals[
+                    expense.payer
+                ] +=
+                    expense.amount;
+
+            }
+
+        }
+    );
+
+
+    const grandTotal =
+        Object.values(
+            totals
+        ).reduce(
+            (
+                sum,
+                value
+            ) =>
+                sum +
+                value,
+            0
+        );
+
+
+    container.innerHTML =
+        members.map(
+            member => {
+
+                const amount =
+                    totals[member];
+
+
+                const percentage =
+                    grandTotal > 0
+                        ? (
+                            amount /
+                            grandTotal
+                        ) * 100
+                        : 0;
+
+
+                return `
+
+                    <div
+                        class="
+                            bg-gray-50
+                            rounded-lg
+                            p-4
+                        "
+                    >
+
+                        <div
+                            class="
+                                flex
+                                justify-between
+                                items-center
+                                mb-3
+                            "
+                        >
+
+                            <span
+                                class="
+                                    font-semibold
+                                    text-gray-700
+                                "
+                            >
+                                ${escapeHtml(member)}
+                            </span>
+
+
+                            <span
+                                class="
+                                    font-bold
+                                    text-gray-800
+                                "
+                            >
+                                ${formatMoney(amount)}
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                h-3
+                                bg-gray-200
+                                rounded-full
+                                overflow-hidden
+                            "
+                        >
+
+                            <div
+                                class="
+                                    bar
+                                    h-full
+                                    bg-green-500
+                                    rounded-full
+                                "
+                                style="
+                                    width:
+                                    ${percentage}%;
+                                "
+                            ></div>
+
+                        </div>
+
+
+                        <p
+                            class="
+                                text-xs
+                                text-gray-500
+                                mt-2
+                            "
+                        >
+                            ${percentage.toFixed(1)}%
+                            of total paid
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+        )
+        .join('');
+
+}
+
+
+/* =========================================================
+   HISTORICAL SUMMARY
+========================================================= */
+
+function updateHistoricalSummary() {
+
+    const archived =
+        allExpenses.filter(
+            expense =>
+                expense.is_archived
+        );
+
+
+    const archivedTotal =
+        archived.reduce(
+            (
+                sum,
+                expense
+            ) =>
+                sum +
+                expense.amount,
+            0
+        );
+
+
+    const months =
+        new Set(
+            archived.map(
+                expense =>
+                    expense.expense_date
+                        .substring(
+                            0,
+                            7
+                        )
+            )
+        );
+
+
+    document.getElementById(
+        'archived-count'
+    ).textContent =
+        archived.length;
+
+
+    document.getElementById(
+        'archived-total'
+    ).textContent =
+        formatMoney(
+            archivedTotal
+        );
+
+
+    document.getElementById(
+        'historical-months'
+    ).textContent =
+        months.size;
+
+}
+
+
+/* =========================================================
+   HISTORY TABLE
+========================================================= */
+
+function updateHistory() {
+
+    const table =
+        document.getElementById(
+            'history-table'
+        );
+
+
+    document.getElementById(
+        'history-count'
+    ).textContent =
+        `${filteredExpenses.length} records`;
+
+
+    if (
+        filteredExpenses.length === 0
+    ) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="
+                        text-center
+                        py-10
+                        text-gray-500
+                    "
+                >
+                    No expenses found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    table.innerHTML =
+        filteredExpenses
+            .map(
+                (expense, index) => {
+
+                    const participants =
+                        getParticipants(
+                            expense
+                        );
+
+
+                    const share =
+                        expense.amount /
+                        participants.length;
+
+
+                    return `
+
+                        <tr
+                            class="
+                                history-row
+                                border-b
+                                border-gray-100
+                                hover:bg-gray-50
+                            "
+                            style="
+                                animation-delay:
+                                ${Math.min(
+                                    index * 0.025,
+                                    0.5
+                                )}s
+                            "
+                        >
+
+                            <td
+                                class="
+                                    p-3
+                                    whitespace-nowrap
+                                    text-sm
+                                    text-gray-600
+                                "
+                            >
+                                ${formatDisplayDate(
+                                    expense.expense_date
+                                )}
+                            </td>
+
+
+                            <td
+                                class="
+                                    p-3
+                                    font-medium
+                                    text-gray-800
+                                "
+                            >
+                                ${escapeHtml(
+                                    expense.description
+                                )}
+                            </td>
+
+
+                            <td
+                                class="
+                                    p-3
+                                    text-gray-700
+                                "
+                            >
+                                ${escapeHtml(
+                                    expense.payer
+                                )}
+                            </td>
+
+
+                            <td
+                                class="
+                                    p-3
+                                    text-sm
+                                    text-gray-600
+                                "
+                            >
+                                ${participants
+                                    .map(
+                                        escapeHtml
+                                    )
+                                    .join(', ')}
+
+                                <div
+                                    class="
+                                        text-xs
+                                        text-gray-400
+                                        mt-1
+                                    "
+                                >
+                                    ${formatMoney(
+                                        share
+                                    )}
+                                    each
+                                </div>
+
+                            </td>
+
+
+                            <td
+                                class="
+                                    p-3
+                                    text-right
+                                    font-bold
+                                    text-gray-800
+                                    whitespace-nowrap
+                                "
+                            >
+                                ${formatMoney(
+                                    expense.amount
+                                )}
+                            </td>
+
+
+                            <td class="p-3">
+
+                                ${
+                                    expense.is_archived
+
+                                        ? `
+                                            <span
+                                                class="
+                                                    inline-flex
+                                                    px-2
+                                                    py-1
+                                                    rounded-full
+                                                    text-xs
+                                                    font-semibold
+                                                    bg-gray-200
+                                                    text-gray-700
+                                                "
+                                            >
+                                                Archived
+                                            </span>
+                                        `
+
+                                        : `
+                                            <span
+                                                class="
+                                                    inline-flex
+                                                    px-2
+                                                    py-1
+                                                    rounded-full
+                                                    text-xs
+                                                    font-semibold
+                                                    bg-green-100
+                                                    text-green-700
+                                                "
+                                            >
+                                                Active
+                                            </span>
+                                        `
+                                }
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join('');
+
+}
+
+
+/* =========================================================
+   PARTICIPANTS
+========================================================= */
+
+function getParticipants(
+    expense
+) {
+
+    if (
+        Array.isArray(
+            expense.participants
+        ) &&
+        expense.participants.length > 0
+    ) {
+
+        return expense.participants;
+
+    }
+
+
+    return members;
+
+}
+
+
+/* =========================================================
+   MONEY
+========================================================= */
+
+function formatMoney(
+    value
+) {
+
+    return `SAR ${Number(
+        value || 0
+    ).toFixed(2)}`;
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function formatDisplayDate(
+    date
+) {
+
+    if (!date) {
+        return '';
+    }
+
+
+    const parts =
+        date.split('-');
+
+
+    if (
+        parts.length !== 3
+    ) {
+
+        return date;
+
+    }
+
+
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+}
+
+
+/* =========================================================
+   MONTH
+========================================================= */
+
+function formatMonth(
+    value
+) {
+
+    const parts =
+        value.split('-');
+
+
+    if (
+        parts.length !== 2
+    ) {
+
+        return value;
+
+    }
+
+
+    const date =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            1
+        );
+
+
+    return date.toLocaleDateString(
+        'en-US',
+        {
+            month: 'long',
+            year: 'numeric'
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(
+    date
+) {
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            '0'
+        );
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            '0'
+        );
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+
+        .replace(
+            /</g,
+            '&lt;'
+        )
+
+        .replace(
+            />/g,
+            '&gt;'
+        )
+
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+
+        .replace(
+            /'/g,
+            '&#039;'
+        );
+
+}
+
+</script>
+
+</body>
+
+</html>
